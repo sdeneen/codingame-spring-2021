@@ -12,3 +12,13 @@ while (true) {
     // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
     console.log('WAIT');
 }
+
+
+const playHawtWoodStrategy = () => {
+    player.getTrees().forEach(tree => {
+        if (cells[tree.cellIdx].richness === 3) {
+            console.log(`COMPLETE ${tree.cellIdx}`)
+            return;
+        }
+    });
+}
