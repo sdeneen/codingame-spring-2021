@@ -15,8 +15,20 @@ while (true) {
 
 
 const playHawtWoodStrategy = () => {
-    player.getTrees().forEach(tree => {
+    game.myPlayer.getTrees().forEach(tree => {
         if (cells[tree.cellIdx].richness === 3) {
+            console.log(`COMPLETE ${tree.cellIdx}`)
+            return;
+        }
+    });
+    game.myPlayer.getTrees().forEach(tree => {
+        if (cells[tree.cellIdx].richness === 2) {
+            console.log(`COMPLETE ${tree.cellIdx}`)
+            return;
+        }
+    });
+    game.myPlayer.getTrees().forEach(tree => {
+        if (cells[tree.cellIdx].richness === 1) {
             console.log(`COMPLETE ${tree.cellIdx}`)
             return;
         }
