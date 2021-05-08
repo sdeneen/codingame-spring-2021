@@ -41,8 +41,8 @@ const parseTurnInput = (): Game => {
     const oppScore = parseInt(inputs[1]); // opponent's score
     const oppIsWaiting = inputs[2] !== '0'; // whether your opponent is asleep until the next day
     const numberOfTrees = parseInt(readline()); // the current amount of trees
-    const myTrees = {};
-    const opponentTrees = {};
+    const myTrees = [];
+    const opponentTrees = [];
     for (let i = 0; i < numberOfTrees; i++) {
         inputs = readline().split(' ');
         const cellIndex = parseInt(inputs[0]); // location of this tree
@@ -51,9 +51,9 @@ const parseTurnInput = (): Game => {
         const isDormant = inputs[3] !== '0'; // 1 if this tree is dormant
         const tree = new Tree(cellIndex, size, isMine, isDormant);
         if (isMine) {
-            myTrees[cellIndex] = tree;
+            myTrees.push(tree);
         } else {
-            opponentTrees[cellIndex] = tree;
+            opponentTrees.push(tree);
         }
     }
 
