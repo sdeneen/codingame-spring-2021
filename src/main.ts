@@ -3,7 +3,8 @@ import { parseInitializationInput, parseTurnInput } from './inputParser';
 const cells = parseInitializationInput();
 
 while (true) {
-    const turnInput = parseTurnInput();
+    const game = parseTurnInput();
+    console.error(game);
 
     // Write an action using console.log()
     // To debug: console.error('Debug messages...');
