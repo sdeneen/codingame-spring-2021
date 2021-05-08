@@ -30,7 +30,7 @@ const parseInitializationInput = (): Cell[] => {
     return cells;
 }
 
-const parseTurnInput = (): Game => {
+const parseTurnInput = (cells: Cell[]): Game => {
     const day = parseInt(readline()); // the game lasts 24 days: 0-23
     const nutrients = parseInt(readline()); // the base score you gain from the next COMPLETE action
     let inputs = readline().split(' ');
@@ -65,7 +65,7 @@ const parseTurnInput = (): Game => {
         possibleActions.push(Action.parse(readline()));
     }
 
-    return new Game(day, nutrients, [], possibleActions, myPlayer, opponentPlayer);
+    return new Game(day, nutrients, cells, possibleActions, myPlayer, opponentPlayer);
 }
 
 export { parseInitializationInput, parseTurnInput };
