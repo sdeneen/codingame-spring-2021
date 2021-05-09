@@ -16,3 +16,5 @@ This repo uses [Rollup](https://rollupjs.org/guide/en/) to bundle files. Configu
 
 We include a [Rollup Typescript plugin](https://www.npmjs.com/package/@rollup/plugin-typescript) to get type checking
 via [Typescript](https://www.typescriptlang.org/docs/).
+
+We use [Jest](https://jestjs.io/) for unit testing, and rely on [ts-jest](https://github.com/kulshekhar/ts-jest) for Jest testing to work with Typescript.
