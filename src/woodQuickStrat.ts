@@ -1,6 +1,7 @@
 import Game from "./model/Game";
 import calculateTreeActionCost from "./cost/ActionCostCalculator";
 import Action from "./model/Action";
+import { getTrashTalk } from "./model/TrashTalker";
 
 const woodQuickStrat = (game: Game) => {
     const maxTreesToConsider = 3;
@@ -23,7 +24,7 @@ const woodQuickStrat = (game: Game) => {
         if (actionForTree !== null) {
             const cost = calculateTreeActionCost(trees, actionForTree, curTree);
             if (sunPoints >= cost) {
-                console.log(actionForTree.toString());
+                console.log(`${actionForTree.toString()} ${getTrashTalk()}`);
                 return;
             }
         }
