@@ -1,5 +1,6 @@
 import Action from "./Action";
 
+export const SEED_TREE_SIZE = 0;
 export const SMALL_TREE_SIZE = 1;
 export const MEDIUM_TREE_SIZE = 2;
 export const LARGE_TREE_SIZE = 3;
