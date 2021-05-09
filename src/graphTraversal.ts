@@ -33,6 +33,8 @@ const findCellsWithinDistance = (cells: Cell[], sourceCellIndex, maxDistance: nu
         const curIndex = getCellIndexWithMinDistance(Array.from(indicesToCheck), cellIndexToDistanceFromSource);
         indicesToCheck.delete(curIndex);
         const curDistanceFromSource = cellIndexToDistanceFromSource[curIndex];
+
+        // Only look at neighbors if we haven't hit our max distance yet, since otherwise they're too far for us to care about them
         if (curDistanceFromSource < maxDistance) {
             const curCell = cells[curIndex];
             const neighborDistanceFromSource = curDistanceFromSource + 1;
@@ -45,6 +47,7 @@ const findCellsWithinDistance = (cells: Cell[], sourceCellIndex, maxDistance: nu
         }
     }
 
+    // We've only added cell distances if they are within our max distance
     return Object.keys(cellIndexToDistanceFromSource).map(i => cellsByIndex[i]);
 };
 
