@@ -33,5 +33,5 @@ export default class Tree {
             return new Action('COMPLETE', this.cellIndex);
         }
         return new Action('GROW', this.cellIndex);
-    }
-}
+    };
+};
