@@ -16,7 +16,7 @@ const getCellIndexWithMinDistance = (indicesToCheck, cellIndexToDistance) =>
     });
 
 /**
- * Traverse the {cells} graph, finding all cells that are within {maxDistance} from the cell at {sourceCellIndex}.
+ * Traverse the {cells} graph, finding all cells that are within {maxDistance} distance from the cell at index {sourceCellIndex}.
  *
  * Based on Dijkstra's shortest path algo: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Pseudocode
  */
