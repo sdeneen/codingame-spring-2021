@@ -30,8 +30,9 @@ export default class Tree {
         }
 
         if (this.size === LARGEST_TREE_SIZE) {
-            return new Action('COMPLETE', this.cellIndex);
+            return new Action('COMPLETE', null, this.cellIndex);
         }
-        return new Action('GROW', this.cellIndex);
+        const retAction = new Action('GROW', null, this.cellIndex);
+        return retAction;
     };
 };

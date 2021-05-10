@@ -63,7 +63,7 @@ const parseTurnInput = (cells: Cell[]): Game => {
     const numberOfPossibleActions = parseInt(readline()); // all legal actions
     const possibleActions = [];
     for (let i = 0; i < numberOfPossibleActions; i++) {
-        possibleActions.push(Action.parse(readline()));
+        continue;
     }
 
     return new Game(day, nutrients, cells, possibleActions, myPlayer, opponentPlayer);

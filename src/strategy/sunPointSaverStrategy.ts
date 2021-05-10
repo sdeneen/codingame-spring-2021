@@ -11,7 +11,7 @@ const getActionForSunPointSaverStrategy = (game: Game): Action => {
     if (cheapestGrowthAction !== null) {
         return cheapestGrowthAction;
     }
-    const freeSeedAction = getFreeSeedOrNull(game);
+    const freeSeedAction = getFreeSeed(game);
     if (freeSeedAction !== null) {
         return freeSeedAction;
     }
@@ -39,7 +39,7 @@ const getCheapestGrowAction = (game: Game): Action | null => {
     return cheapestTreeToGrow?.getNextAction() || null;
 }
 
-const getFreeSeedOrNull = (game: Game): Action => {
+const getFreeSeed = (game: Game): Action | null => {
     const { myPlayer: { sunPoints:mySunPoints, trees:myTrees } } = game;
     for (let i = 0; i < myTrees.length; i++) {
         const tree = myTrees[i];

@@ -18,9 +18,7 @@ export default class Action {
         targetCellIdx: number,
     );
 
-    constructor(type: typeof GROW | typeof COMPLETE, targetCellIdx: number);
-
-    constructor(type: string, sourceCellIdx?: number, targetCellIdx?: number,);
+    constructor(type: typeof GROW | typeof COMPLETE, source: null, targetCellIdx: number);
 
     constructor(
         type: ACTION_TYPES,
@@ -43,7 +41,7 @@ export default class Action {
                 return new Action(SEED, parseInt(parts[1]), parseInt(parts[2]));
 
             default:
-                return new Action(parts[0], parseInt(parts[1]));
+                throw new Error("Not implemented");
         }
     }
 
