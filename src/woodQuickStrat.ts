@@ -18,7 +18,8 @@ const woodQuickStrat = (game: Game) => {
         return tree2.size - tree1.size;
     });
 
-    for (let i = 0; i < maxTreesToConsider; i++) {
+    const numTreesToConsider = Math.min(trees.length, maxTreesToConsider);
+    for (let i = 0; i < numTreesToConsider; i++) {
         const curTree = trees[i];
         const actionForTree = curTree.getNextAction();
         if (actionForTree !== null) {
