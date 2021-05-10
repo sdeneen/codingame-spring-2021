@@ -7,29 +7,27 @@ type ACTION_TYPES = typeof WAIT | typeof SEED | typeof GROW | typeof COMPLETE;
 
 export default class Action {
     type: ACTION_TYPES;
-    targetCellIdx: number;
     sourceCellIdx: number;
+    targetCellIdx: number;
 
     constructor(type: typeof WAIT);
 
     constructor(
         type: typeof SEED,
+        sourceCellIdx: number,
         targetCellIdx: number,
-        sourceCellIdx: number
     );
 
-    constructor(type: typeof GROW | typeof COMPLETE, targetCellIdx: number);
-
-    constructor(type: string, targetCellIdx?: number, sourceCellIdx?: number);
+    constructor(type: typeof GROW | typeof COMPLETE, source: null, targetCellIdx: number);
 
     constructor(
         type: ACTION_TYPES,
+        sourceCellIdx?: number,
         targetCellIdx?: number,
-        sourceCellIdx?: number
     ) {
         this.type = type;
-        this.targetCellIdx = targetCellIdx;
         this.sourceCellIdx = sourceCellIdx;
+        this.targetCellIdx = targetCellIdx;
     }
 
     static parse(line: string) {
@@ -40,10 +38,10 @@ export default class Action {
                 return new Action(WAIT);
 
             case SEED:
-                return new Action(SEED, parseInt(parts[2]), parseInt(parts[1]));
+                return new Action(SEED, parseInt(parts[1]), parseInt(parts[2]));
 
             default:
-                return new Action(parts[0], parseInt(parts[1]));
+                throw new Error("Not implemented");
         }
     }
 
@@ -59,3 +57,5 @@ export default class Action {
         return `${this.type} ${this.targetCellIdx}`;
     }
 }
+
+export { ACTION_TYPES }

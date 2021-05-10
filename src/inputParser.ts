@@ -50,6 +50,7 @@ const parseTurnInput = (cells: Cell[]): Game => {
         const isMine = inputs[2] !== '0'; // 1 if this is your tree
         const isDormant = inputs[3] !== '0'; // 1 if this tree is dormant
         const tree = new Tree(cellIndex, size, isMine, isDormant);
+        cells[cellIndex].setOccupied();
         if (isMine) {
             myTrees.push(tree);
         } else {
@@ -62,7 +63,7 @@ const parseTurnInput = (cells: Cell[]): Game => {
     const numberOfPossibleActions = parseInt(readline()); // all legal actions
     const possibleActions = [];
     for (let i = 0; i < numberOfPossibleActions; i++) {
-        possibleActions.push(Action.parse(readline()));
+        readline()
     }
 
     return new Game(day, nutrients, cells, possibleActions, myPlayer, opponentPlayer);

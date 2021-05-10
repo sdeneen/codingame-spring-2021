@@ -1,6 +1,7 @@
 export default class Cell {
     index: number;
     richness: number;
+    isOccupied: boolean;
 
     /**
      * Indices of neighboring cells, one for each direction (6 directions for a hex board).
@@ -17,6 +18,10 @@ export default class Cell {
         this.index = index;
         this.richness = richness;
         this.neighbors = neighbors;
+    }
+
+    setOccupied = () => { 
+        this.isOccupied = true
     }
 
     /**

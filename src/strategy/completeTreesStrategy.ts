@@ -26,7 +26,7 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
         const curTree = trees[i];
         const actionForTree = curTree.getNextAction();
         if (actionForTree !== null) {
-            const cost = calculateTreeActionCost(trees, actionForTree, curTree);
+            const cost = calculateTreeActionCost(trees, actionForTree.type, curTree);
             if (sunPoints >= cost) {
                 return actionForTree;
             }

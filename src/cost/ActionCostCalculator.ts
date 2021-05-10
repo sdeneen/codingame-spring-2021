@@ -1,12 +1,12 @@
-import Action from "../model/Action";
+import { ACTION_TYPES } from "../model/Action";
 import Tree, { SEED_TREE_SIZE, SMALL_TREE_SIZE, MEDIUM_TREE_SIZE, LARGE_TREE_SIZE } from "../model/Tree";
 
 const COST_TO_COMPLETE_TREE = 4;
 
 const getTreesWithSize = (trees: Tree[], size: number): number => trees.filter(t => t.size === size).length;
 
-const calculateTreeActionCost = (ownedTrees: Tree[], action: Action, tree: Tree): number => {
-    switch (action.type) {
+const calculateTreeActionCost = (ownedTrees: Tree[], actionType: ACTION_TYPES, tree: Tree): number => {
+    switch (actionType) {
         case "COMPLETE":
             return COST_TO_COMPLETE_TREE;
         case "GROW":
