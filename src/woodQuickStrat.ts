@@ -19,7 +19,7 @@ const woodQuickStrat = (game: Game) => {
     });
 
     for (let i = 0; i < maxTreesToConsider; i++) {
-        const curTree = trees[0];
+        const curTree = trees[i];
         const actionForTree = curTree.getNextAction();
         if (actionForTree !== null) {
             const cost = calculateTreeActionCost(trees, actionForTree, curTree);
