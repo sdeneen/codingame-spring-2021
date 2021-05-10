@@ -1,0 +1,25 @@
+Sick strat let's go.
+
+Two sequences of play:
+1. Sun gathering phase (engine building)
+ - Try to GROW
+ 		- (later) Prioritize GROW trees for whichever will get us the most possible sun points next turn
+ 	 	- Prioritize low cost
+ 	 	- Break ties by largest tree
+ 	 	- (later) Break ties by picking whichever blocks more opponent sun points next turn
+ - If we can't grow anything, SEED somewhere if's free:
+ 		- position to block (maybe prioritize diagnols so we can't block ourselves)
+
+Optimizations:
+- Down the road may need to add in logic to COMPLETE earlier to capitalize on high nutrient forest before opponent does
+
+Add a phase 1.5 in here that prioritizes growing in richer areas
+
+2. Point scoring phase (completing trees ftw)
+ - This is pretty much the same as the strategy that got us out of Wood league, except prioritize largest trees first since they're closest to completion
+ - Optimizations:
+    - consider prioritizing completing trees that will be blocked the next turn
+    - think about how to save sun points for future days, right now the algo goes wide across many trees but we may want to go deep
+
+Tips:
+- don't forget to check for richness = 0, which are cells that aren't usable
