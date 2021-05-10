@@ -1,27 +1,25 @@
-import Game from "./model/Game";
-import calculateTreeActionCost from "./cost/ActionCostCalculator";
-import Action from "./model/Action";
-import { getTrashTalk } from "./utils/trashTalker";
-import Tree from "./model/Tree";
-import findCellsWithinDistance from "./graphTraversal";
-import Cell from "./model/Cell";
+import Game from "../model/Game";
+import calculateTreeActionCost from "../cost/ActionCostCalculator";
+import Action from "../model/Action";
+import { getTrashTalk } from "../utils/trashTalker";
+import Tree from "../model/Tree";
+import findCellsWithinDistance from "../graphTraversal";
+import Cell from "../model/Cell";
 
-const woodQuickStrat = (game: Game) => {
+const getActionForSunPointSaverStrategy = (game: Game): Action => {
     const cheapestGrowthAction = getCheapestGrowAction(game);
     if (cheapestGrowthAction !== null) {
-        console.log(`${cheapestGrowthAction} ${getTrashTalk()}`);
-        return;
+        return cheapestGrowthAction;
     }
-
     const freeSeedAction = getFreeSeedOrNull(game);
     if (freeSeedAction !== null) {
-        console.log(`${freeSeedAction} ${getTrashTalk}`)
+        return freeSeedAction;
     }
 
-    console.log(new Action("WAIT").toString());
+    return new Action("WAIT");
 }
 
-const getCheapestGrowAction = (game: Game): Action => {
+const getCheapestGrowAction = (game: Game): Action | null => {
     const { myPlayer: { sunPoints:mySunPoints, trees:myTrees } } = game;
     let cheapestTreeToGrow: Tree = null;
     let cheapestCost: Number = Number.MAX_VALUE;
@@ -38,7 +36,7 @@ const getCheapestGrowAction = (game: Game): Action => {
         }
     }
     
-    return cheapestTreeToGrow?.getNextAction();
+    return cheapestTreeToGrow?.getNextAction() || null;
 }
 
 const getFreeSeedOrNull = (game: Game): Action => {
@@ -61,4 +59,5 @@ const getFreeSeedOrNull = (game: Game): Action => {
 
 }
 
-export default woodQuickStrat;
+export default getActionForSunPointSaverStrategy;
+
