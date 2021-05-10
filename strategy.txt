@@ -7,7 +7,7 @@ Two sequences of play:
  	 	- Prioritize low cost
  	 	- Break ties by largest tree
  	 	- (later) Break ties by picking whichever blocks more opponent sun points next turn
- - If we can't grow anything, SEED somewhere if's free:
+ - If we can't grow anything, SEED somewhere if it's free:
  		- position to block (maybe prioritize diagnols so we can't block ourselves)
 
 Optimizations:

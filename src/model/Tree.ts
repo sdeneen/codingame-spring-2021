@@ -35,4 +35,6 @@ export default class Tree {
         const retAction = new Action('GROW', null, this.cellIndex);
         return retAction;
     };
+
+    getSunPointGainPerTurn = (): number => this.size;
 };

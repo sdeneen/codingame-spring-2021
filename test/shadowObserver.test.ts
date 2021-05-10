@@ -1,5 +1,5 @@
 import cellsData from "./data/CellsData";
-import { getCellsInTreeShadow, getTreesThatAreBlockedByTreeShadow } from "../src/ShadowObserver";
+import { getAllTreesThatAreBlockedByAnyShadow, getCellsInTreeShadow, getTreesThatAreBlockedByTreeShadow} from "../src/ShadowObserver";
 import Tree, {SMALL_TREE_SIZE, LARGE_TREE_SIZE, MEDIUM_TREE_SIZE} from "../src/model/Tree";
 
 const getMockTree = (index, size) => new Tree(index, size, true, false);
@@ -58,4 +58,20 @@ test('it larger trees are not blocked by shadow', () => {
 
     const blockedTrees = getTreesThatAreBlockedByTreeShadow(cellsData, allTrees, sourceTree, 1);
     expect(blockedTrees).toHaveLength(0);
+});
+
+test('it gets all trees that are blocked by any shadow', () => {
+   const allTrees = [
+       getMockTree(0, LARGE_TREE_SIZE),
+       getMockTree(19, LARGE_TREE_SIZE),
+       getMockTree(3, SMALL_TREE_SIZE),
+       getMockTree(2, MEDIUM_TREE_SIZE),
+       getMockTree(8, MEDIUM_TREE_SIZE),
+       getMockTree(4, MEDIUM_TREE_SIZE),
+       getMockTree(30, SMALL_TREE_SIZE),
+   ];
+   const expectedBlockedTreeIndices = new Set([19, 8]);
+   const blockedTrees = getAllTreesThatAreBlockedByAnyShadow(cellsData, allTrees, 0);
+   expect(blockedTrees).toHaveLength(expectedBlockedTreeIndices.size);
+   expect(blockedTrees.map(t => t.cellIndex).every(i => expectedBlockedTreeIndices.has(i)));
 });
