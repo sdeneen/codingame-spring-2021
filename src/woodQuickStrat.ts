@@ -7,7 +7,7 @@ import Tree from "./model/Tree";
 const woodQuickStrat = (game: Game) => {
     const cheapestGrowthAction = getCheapestGrowAction(game);
 
-    if (cheapestGrowthAction != null) {
+    if (cheapestGrowthAction !== null) {
         console.log(`${cheapestGrowthAction} ${getTrashTalk()}`);
     }
 
