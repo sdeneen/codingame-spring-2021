@@ -20,7 +20,7 @@ const getCheapestGrowAction = (game: Game): Action => {
     const { myPlayer: { sunPoints:mySunPoints, trees:myTrees } } = game;
     let cheapestTreeToGrow: Tree = null;
     let cheapestCost: Number = Number.MAX_VALUE;
-
+    
     for (let i = 0; i < myTrees.length; i++) {
         const tree = myTrees[i];
         const nextAction = tree.getNextAction()
