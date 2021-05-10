@@ -1,37 +1,37 @@
 import Game from "./model/Game";
 import calculateTreeActionCost from "./cost/ActionCostCalculator";
 import Action from "./model/Action";
-import { getTrashTalk } from "./model/TrashTalker";
+import { getTrashTalk } from "./utils/trashTalker";
+import Tree from "./model/Tree";
 
 const woodQuickStrat = (game: Game) => {
-    const maxTreesToConsider = 3;
-    const { myPlayer: { sunPoints, trees }, cells } = game;
-    trees.sort((tree1, tree2) => {
-        const richness1 = cells[tree1.cellIndex].richness;
-        const richness2 = cells[tree2.cellIndex].richness;
-        // Prioritize high richness first
-        if (richness1 !== richness2) {
-            return richness2 - richness1;
-        }
+    const cheapestGrowthAction = getCheapestGrowAction(game);
 
-        // Then prioritize large tree size
-        return tree2.size - tree1.size;
-    });
-
-    const numTreesToConsider = Math.min(trees.length, maxTreesToConsider);
-    for (let i = 0; i < numTreesToConsider; i++) {
-        const curTree = trees[i];
-        const actionForTree = curTree.getNextAction();
-        if (actionForTree !== null) {
-            const cost = calculateTreeActionCost(trees, actionForTree, curTree);
-            if (sunPoints >= cost) {
-                console.log(`${actionForTree.toString()} ${getTrashTalk()}`);
-                return;
-            }
-        }
+    if (cheapestGrowthAction !== null) {
+        console.log(`${cheapestGrowthAction} ${getTrashTalk()}`);
     }
 
     console.log(new Action("WAIT").toString());
+}
+
+const getCheapestGrowAction = (game: Game): Action => {
+    const { myPlayer: { sunPoints:mySunPoints, trees:myTrees } } = game;
+    let cheapestTreeToGrow: Tree = null;
+    let cheapestCost: Number = Number.MAX_VALUE;
+
+    for (let i = 0; i < myTrees.length; i++) {
+        const tree = myTrees[i];
+        const nextAction = tree.getNextAction()
+        if (nextAction?.type === "GROW") {
+            const growthCost = calculateTreeActionCost(myTrees, nextAction, tree)
+            if (growthCost <= mySunPoints && growthCost < cheapestCost) {
+                cheapestCost = growthCost;
+                cheapestTreeToGrow = tree;
+            }
+        }
+    }
+    
+    return cheapestTreeToGrow?.getNextAction();
 }
 
 export default woodQuickStrat;
