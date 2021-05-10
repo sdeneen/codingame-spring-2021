@@ -45,7 +45,7 @@ const getFreeSeed = (game: Game): Action | null => {
         const tree = myTrees[i];
         if (!tree.isDormant) {
             if (calculateTreeActionCost(myTrees, "SEED", tree) === 0) {
-                const freeCells = findCellsWithinDistance(game.cells, tree.cellIndex, 1).filter(cell => !cell.isOccupied);
+                const freeCells = findCellsWithinDistance(game.cells, tree.cellIndex, 1).filter(cell => !cell.isOccupied && cell.richness > 0);
                 if (freeCells.length === 0) {
                     continue;
                 }
