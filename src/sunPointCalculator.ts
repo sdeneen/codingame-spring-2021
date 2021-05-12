@@ -4,18 +4,19 @@ import Tree from "./model/Tree";
 import Cell from "./model/Cell";
 
 /**
- * Given the game state, calculate how many sun points the given player earns in a turn.
+ * Given the game state, calculate how many sun points the given player earns in the sun collection phase at the start
+ * of the day.
  */
-const calculateSunPointsGainedForTurn = (cells: Cell[], player: Player, allTrees: Tree[], day: number) => {
+const calculateSunPointsGainedForDay = (cells: Cell[], player: Player, allTrees: Tree[], day: number) => {
     const blockedCells = getAllTreesThatAreBlockedByAnyShadow(cells, allTrees, day);
     const blockedTreeIndices = new Set(blockedCells.map(t => t.cellIndex));
-    const sunPointArray = player.trees
+    const sunPointArray = player.getTrees()
         .filter(t => !blockedTreeIndices.has(t.cellIndex))
-        .map(t => t.getSunPointGainPerTurn())
+        .map(t => t.getSunPointGainPerDay())
 
     return sunPointArray.length > 0
         ? sunPointArray.reduce((sunPoints1, sunPoints2) => sunPoints1 + sunPoints2)
         : 0;
 };
 
-export default calculateSunPointsGainedForTurn;
+export default calculateSunPointsGainedForDay;

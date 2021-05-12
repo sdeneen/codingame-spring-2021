@@ -7,7 +7,9 @@ import Game from "../model/Game";
  */
 const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
     const maxTreesToConsider = 3;
-    const { myPlayer: { sunPoints, trees }, cells } = game;
+    const { myPlayer, cells } = game;
+    const { sunPoints } = myPlayer;
+    const trees = myPlayer.getTrees();
     trees.sort((tree1, tree2) => {
         // Prioritize largest size first (closest to completion)
         if (tree2.size !== tree1.size) {
