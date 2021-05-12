@@ -7,7 +7,7 @@ import calculateTreeActionCost from "./cost/ActionCostCalculator";
  * Given a game state and a target cell index to perform the GROW action on, return what the game state would be
  * after that action is taken.
  *
- * This could be augmented this later to handle any action, not just grow actions.
+ * This could be augmented later to handle any action, not just grow actions.
  */
 const determineGameStateAfterGrowAction = (currentState: Game, targetCellIndex: number): Game => {
     const { myPlayer, opponentPlayer } = currentState;
