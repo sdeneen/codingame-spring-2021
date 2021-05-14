@@ -50,7 +50,6 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
 const getCompleteActionForSpookedTrees = (game: Game): Action | null => {
     const wastedTrees = getAllWastedTrees(game, 2);
     if (wastedTrees.length !== 0) {
-        console.error(`${wastedTrees.length} wasteable trees`);
         return wastedTrees[0].getNextAction();
     }
     return null;
@@ -66,12 +65,9 @@ const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
         let areAllDaysWasted: boolean = true;
 
         for (let i = 1; i <= wastedDays; i++) {
-            console.error(tree);
             // put literal 3 as variable and put this in new method
             const neighborIndexToCheck = (curSunDirection + i + 3) % NUM_DIRECTIONS;
-            console.error(`shade direction index ${neighborIndexToCheck}`);
             let curNeighborCellToCheck: number = game.cells[tree.cellIndex].neighbors[neighborIndexToCheck];
-            console.error(`neighbor cell index ${curNeighborCellToCheck}`);
             let isCheckedDayWasted: boolean = false;
             while (curNeighborCellToCheck != -1) {
                 if (game.cells[curNeighborCellToCheck].tree?.size >= tree.size) {
