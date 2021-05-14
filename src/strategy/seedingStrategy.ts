@@ -6,7 +6,6 @@ import Cell from "../model/Cell";
 
 const getHighestRichnessFreeSeedAction = (game: Game): Action | null => {
     const freeSeedActions = getFreeSeedActions(game);
-    // todo (mv): if next to two or more myPlayer trees, filter it out
     if (freeSeedActions.length === 0) {
         return null;
     }
