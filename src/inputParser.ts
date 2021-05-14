@@ -30,6 +30,7 @@ const parseInitializationInput = (): Cell[] => {
 }
 
 const parseTurnInput = (cells: Cell[]): Game => {
+    cells.map(cell => cell.tree = null);
     const day = parseInt(readline()); // the game lasts 24 days: 0-23
     const nutrients = parseInt(readline()); // the base score you gain from the next COMPLETE action
     let inputs = readline().split(' ');
