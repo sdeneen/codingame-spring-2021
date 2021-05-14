@@ -55,6 +55,7 @@ export default class Tree {
   toString = () => JSON.stringify(this);
 
   equals = (other: Tree): boolean =>
+    !!other &&
     this.cellIndex === other.cellIndex &&
     this.size === other.size &&
     this.isMine === other.isMine &&

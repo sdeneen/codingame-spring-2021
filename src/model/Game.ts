@@ -65,6 +65,7 @@ export default class Game {
   toString = () => JSON.stringify(this);
 
   equals = (other: Game): boolean =>
+    !!other &&
     this.day === other.day &&
     this.nutrients === other.nutrients &&
     this.cells.length === other.cells.length &&
