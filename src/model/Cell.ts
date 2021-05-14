@@ -1,5 +1,10 @@
 import Tree from "./Tree";
 
+export const UNUSABLE_RICHNESS = 0;
+export const LOW_RICHNESS = 1;
+export const MEDIUM_RICHNESS = 2;
+export const HIGH_RICHNESS = 3;
+
 export default class Cell {
     index: number;
     richness: number;
