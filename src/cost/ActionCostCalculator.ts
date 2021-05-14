@@ -28,3 +28,4 @@ const calculateTreeActionCost = (ownedTrees: Tree[], actionType: ACTION_TYPES, t
 };
 
 export default calculateTreeActionCost;
+export { COST_TO_COMPLETE_TREE }

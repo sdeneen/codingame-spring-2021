@@ -1,8 +1,9 @@
-import calculateTreeActionCost from "../cost/ActionCostCalculator";
+import calculateTreeActionCost, { COST_TO_COMPLETE_TREE } from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import Game from "../model/Game";
 import { NUM_DIRECTIONS } from "../miscConstants";
-import Tree from "../model/Tree";
+import Tree, { LARGE_TREE_SIZE } from "../model/Tree";
+import { getTreesThatCastSpookyShadowOnTree } from "../shadowObserver";
 
 /**
  * Strategy that just tries to complete trees as soon as possible, good for late game.
@@ -48,16 +49,19 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
  *       future days to be spooked
  */
 const getCompleteActionForSpookedTrees = (game: Game): Action | null => {
-    const wastedTrees = getAllWastedTrees(game, 2);
-    if (wastedTrees.length !== 0) {
-        return wastedTrees[0].getNextAction();
+    if (game.myPlayer.sunPoints >= COST_TO_COMPLETE_TREE) {
+        const wastedTrees = getAllWastedTrees(game, 2);
+     
+        if (wastedTrees.length !== 0) {
+            // todo optimize: if there are multiple, pick best option (richness?, most wasted days?, least oppo blocking?)
+            return wastedTrees[0].getNextAction();
+        }
     }
     return null;
 }
 
 const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
-    const curSunDirection: number = game.day % NUM_DIRECTIONS;
-    const myCompletableTrees: Tree[] = game.myPlayer.getTrees().filter(tree => tree.size === 3 && !tree.isDormant);
+    const myCompletableTrees: Tree[] = getCompletableTrees(game.myPlayer.getTrees());
     let wastedTrees: Tree[] = []
 
     for (let index = 0; index < myCompletableTrees.length; index++) {
@@ -65,19 +69,8 @@ const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
         let areAllDaysWasted: boolean = true;
 
         for (let i = 1; i <= wastedDays; i++) {
-            // put literal 3 as variable and put this in new method
-            const neighborIndexToCheck = (curSunDirection + i + 3) % NUM_DIRECTIONS;
-            let curNeighborCellToCheck: number = game.cells[tree.cellIndex].neighbors[neighborIndexToCheck];
-            let isCheckedDayWasted: boolean = false;
-            while (curNeighborCellToCheck != -1) {
-                if (game.cells[curNeighborCellToCheck].tree?.size >= tree.size) {
-                    isCheckedDayWasted = true;
-                    // at least one neighbor is throwing shade on the tree
-                    break;
-                }
-                curNeighborCellToCheck = game.cells[curNeighborCellToCheck].neighbors[neighborIndexToCheck];
-            }
-            if (!isCheckedDayWasted) {
+            const treesCastingSpookyShadows = getTreesThatCastSpookyShadowOnTree(game.cells, game.day + i, tree);
+            if (treesCastingSpookyShadows.length === 0) {
                 // No need to continue checking since
                 // at least one day of the N days will get sun points
                 areAllDaysWasted = false;
@@ -91,6 +84,10 @@ const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
     }
 
     return wastedTrees;
+}
+
+const getCompletableTrees = (trees: Tree[]): Tree[] => {
+    return trees.filter(tree => tree.size === LARGE_TREE_SIZE && !tree.isDormant);
 }
 
 export { getActionForCompleteTreesStrategy, getCompleteActionForSpookedTrees }

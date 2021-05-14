@@ -1,6 +1,7 @@
-import Tree from "./model/Tree";
+import Tree, { LARGEST_TREE_SIZE } from "./model/Tree";
 import Cell from "./model/Cell";
 import { NUM_DIRECTIONS } from './miscConstants';
+import Game from "./model/Game";
 
 /**
  * Finds all cells that the sourceTree casts a shadow on when it is the given day.
@@ -52,4 +53,27 @@ const getAllTreesThatAreBlockedByAnyShadow = (cells: Cell[], allTrees: Tree[], d
     return allTrees.filter(tree => cellIndexToLargestShadow[tree.cellIndex] !== undefined && cellIndexToLargestShadow[tree.cellIndex] >= tree.size);
 };
 
-export { getCellsInTreeShadow, getTreesThatAreBlockedByTreeShadow, getAllTreesThatAreBlockedByAnyShadow };
+const getTreesThatCastSpookyShadowOnTree = (allCells: Cell[], day: number, targetTree: Tree): Tree[] => {
+    const neighborIndexToCheck = getOppositeDirectionOfSun(day);
+    let curNeighborCellToCheck: number = allCells[targetTree.cellIndex].neighbors[neighborIndexToCheck];
+    let treesCastingSpookyShadows = [];
+    let neighborDistance = 1;
+
+    while (curNeighborCellToCheck !== -1 && neighborDistance <= LARGEST_TREE_SIZE) {
+        if (allCells[curNeighborCellToCheck].tree?.size >= targetTree.size) {
+            treesCastingSpookyShadows.push(allCells[curNeighborCellToCheck].tree);
+        }
+        curNeighborCellToCheck = allCells[curNeighborCellToCheck].neighbors[neighborIndexToCheck];
+        neighborDistance++;
+    }
+
+    return treesCastingSpookyShadows;
+}
+
+const getOppositeDirectionOfSun = (day: number) => {
+    const sunDirectionOnDay: number = day % NUM_DIRECTIONS;
+    const indicesForOppositeDirection = NUM_DIRECTIONS / 2;
+    return (sunDirectionOnDay + indicesForOppositeDirection) % NUM_DIRECTIONS
+}
+
+export { getCellsInTreeShadow, getTreesThatAreBlockedByTreeShadow, getAllTreesThatAreBlockedByAnyShadow, getTreesThatCastSpookyShadowOnTree};
