@@ -5,8 +5,15 @@ import Tree from "../model/Tree";
 import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
 import { getHighestRichnessFreeSeedAction } from "./seedingStrategy";
+import { getCompleteActionForSpookedTrees } from "./completeTreesStrategy";
 
 const getActionForSunPointSaverStrategy = (game: Game): Action => {
+    const bestCompleteAction = getCompleteActionForSpookedTrees(game);
+    if (bestCompleteAction !== null) {
+        console.error("===== Completing early!")
+        return bestCompleteAction;
+    }
+
     const bestGrowAction = getGrowActionWithBestSunPointPayoff(game);
     if (bestGrowAction !== null) {
         return bestGrowAction;

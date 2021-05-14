@@ -49,7 +49,7 @@ const parseTurnInput = (cells: Cell[]): Game => {
         const isMine = inputs[2] !== '0'; // 1 if this is your tree
         const isDormant = inputs[3] !== '0'; // 1 if this tree is dormant
         const tree = new Tree(cellIndex, size, isMine, isDormant);
-        cells[cellIndex].setOccupied();
+        cells[cellIndex].setTree(tree);
         if (isMine) {
             myTrees.push(tree);
         } else {

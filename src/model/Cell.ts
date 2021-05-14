@@ -1,7 +1,8 @@
+import Tree from "./Tree";
+
 export default class Cell {
     index: number;
     richness: number;
-    isOccupied: boolean;
 
     /**
      * Indices of neighboring cells, one for each direction (6 directions for a hex board).
@@ -9,6 +10,8 @@ export default class Cell {
      * in that direction (i.e. this cell is at the edge of the board)
      */
     neighbors: [number, number, number, number, number, number];
+
+    tree: Tree | null;
 
     constructor(
         index: number,
@@ -18,10 +21,15 @@ export default class Cell {
         this.index = index;
         this.richness = richness;
         this.neighbors = neighbors;
+        this.tree = null;
     }
 
-    setOccupied = () => { 
-        this.isOccupied = true
+    setTree = (tree: Tree) => {
+        this.tree = tree;
+    }
+
+    isOccupied = (): boolean => {
+        return this.tree !== null;
     }
 
     /**
@@ -33,7 +41,6 @@ export default class Cell {
 
     equals = (other: Cell): boolean => this.index === other.index
         && this.richness === other.richness
-        && this.isOccupied === other.isOccupied
         && this.neighbors.length === other.neighbors.length
         && this.neighbors.every((value, index) => value === other.neighbors[index]);
 }

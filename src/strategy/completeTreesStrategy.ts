@@ -1,6 +1,9 @@
-import calculateTreeActionCost from "../cost/ActionCostCalculator";
+import calculateTreeActionCost, { COST_TO_COMPLETE_TREE } from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import Game from "../model/Game";
+import { NUM_DIRECTIONS } from "../miscConstants";
+import Tree, { LARGE_TREE_SIZE } from "../model/Tree";
+import { getTreesThatCastSpookyShadowOnTree } from "../shadowObserver";
 
 /**
  * Strategy that just tries to complete trees as soon as possible, good for late game.
@@ -38,4 +41,53 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
     return new Action("WAIT");
 };
 
-export default getActionForCompleteTreesStrategy;
+/**
+ * Strategy that finds trees that are able to be completed (Size 3) and 
+ * would not garner sun points for the next N days.
+ * 
+ * Note: this is a prediction since the oppo can grow a tree during the next day that causes 
+ *       future days to be spooked
+ */
+const getCompleteActionForSpookedTrees = (game: Game): Action | null => {
+    if (game.myPlayer.sunPoints >= COST_TO_COMPLETE_TREE) {
+        const wastedTrees = getAllWastedTrees(game, 2);
+     
+        if (wastedTrees.length !== 0) {
+            // todo optimize: if there are multiple, pick best option (richness?, most wasted days?, least oppo blocking?)
+            return wastedTrees[0].getNextAction();
+        }
+    }
+    return null;
+}
+
+const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
+    const myCompletableTrees: Tree[] = getCompletableTrees(game.myPlayer.getTrees());
+    let wastedTrees: Tree[] = []
+
+    for (let index = 0; index < myCompletableTrees.length; index++) {
+        const tree: Tree = myCompletableTrees[index];
+        let areAllDaysWasted: boolean = true;
+
+        for (let i = 1; i <= wastedDays; i++) {
+            const treesCastingSpookyShadows = getTreesThatCastSpookyShadowOnTree(game.cells, game.day + i, tree);
+            if (treesCastingSpookyShadows.length === 0) {
+                // No need to continue checking since
+                // at least one day of the N days will get sun points
+                areAllDaysWasted = false;
+                break;
+            }
+        }
+
+        if (areAllDaysWasted) {
+            wastedTrees.push(tree);
+        }
+    }
+
+    return wastedTrees;
+}
+
+const getCompletableTrees = (trees: Tree[]): Tree[] => {
+    return trees.filter(tree => tree.size === LARGE_TREE_SIZE && !tree.isDormant);
+}
+
+export { getActionForCompleteTreesStrategy, getCompleteActionForSpookedTrees }
