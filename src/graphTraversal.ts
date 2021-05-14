@@ -36,12 +36,14 @@ const findCellsWithinDistance = (cells: Cell[], sourceCellIndex, maxDistance: nu
 
         // Only look at neighbors if we haven't hit our max distance yet, since otherwise they're too far for us to care about them
         if (curDistanceFromSource < maxDistance) {
-            const curCell = cells[curIndex];
+            const curCell = cellsByIndex[curIndex];
             const neighborDistanceFromSource = curDistanceFromSource + 1;
             curCell.getNeighborCellIndices().forEach(neighborIndex => {
                if (cellIndexToDistanceFromSource[neighborIndex] === undefined || cellIndexToDistanceFromSource[neighborIndex] > neighborDistanceFromSource) {
                    cellIndexToDistanceFromSource[neighborIndex] = neighborDistanceFromSource;
-                   indicesToCheck.add(neighborIndex);
+                   if (neighborDistanceFromSource < maxDistance) {
+                       indicesToCheck.add(neighborIndex);
+                   }
                }
             });
         }

@@ -7,6 +7,8 @@ Two sequences of play:
  	 	- (later) Break ties by picking whichever blocks more opponent sun points next turn
  - If we can't grow anything, SEED somewhere if it's free:
  		- position to block (maybe prioritize diagnols so we can't block ourselves)
+		- Prefer areas with higher richness
+		- Seed the biggest tree to spread across the forest - prevents blocking ourselves and makes it hardest for opponent
 
 Optimizations:
 - Down the road may need to add in logic to COMPLETE earlier to capitalize on high nutrient forest before opponent does
@@ -16,14 +18,17 @@ Add a phase 1.5 in here that prioritizes growing in richer areas
 2. Point scoring phase (completing trees ftw)
  - This is pretty much the same as the strategy that got us out of Wood league, except prioritize largest trees first since they're closest to completion
  - Optimizations:
-    - consider prioritizing completing trees that will be blocked the next turn
+    - consider switching to complete phase based on board rather than % of game complete. E.g. N spaces are taken and it'd be better to start collection.
+	- consider prioritizing completing trees that will be blocked the next turn
     - think about how to save sun points for future days, right now the algo goes wide across many trees but we may want to go deep
 
 Tips:
 - don't forget to check for richness = 0, which are cells that aren't usable
 
-Changelog (reverse chronological order):
+Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
-- (1255 Silver -> 1891 Silver) Fix deepcopying bug. No clue how the bug was helping us :/
+- (716 Silver -> 502 Silver) Don't seed if there are two or more occupied adjacent cells
+- (880 Silver -> 716 Silver) Seed on the cell with the highest richness. Seed based on tree size rather than just 1 distance away.
+- (1255 Silver -> 880 Silver) Fix deepcopying bug. 
 - (1140 Silver -> 1074 Silver) Prioritize GROW trees for whichever results in us having the most sun points at the start of action phase in the next day
 - (2052 Silver -> 1140 Silver) Prioritize GROW trees for whichever results in us gaining the most sun points in the next sun collection phase

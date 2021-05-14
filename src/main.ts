@@ -12,10 +12,10 @@ const cells: Cell[] = parseInitializationInput();
 while (true) {
     const game: Game = parseTurnInput(cells);
     let action: Action;
-    if (game.day / NUM_TURNS >= 0.75) {
-        action = getActionForCompleteTreesStrategy(game);
-    } else {
+    if (game.day / NUM_TURNS < 0.75) {
         action = getActionForSunPointSaverStrategy(game);
+    } else {
+        action = getActionForCompleteTreesStrategy(game);
     }
 
     console.log(`${action} ${getTrashTalk()}`);

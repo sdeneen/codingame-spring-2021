@@ -2,16 +2,16 @@ import Game from "../model/Game";
 import calculateTreeActionCost from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import Tree from "../model/Tree";
-import findCellsWithinDistance from "../graphTraversal";
 import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
+import { getHighestRichnessFreeSeedAction } from "./seedingStrategy";
 
 const getActionForSunPointSaverStrategy = (game: Game): Action => {
     const bestGrowAction = getGrowActionWithBestSunPointPayoff(game);
     if (bestGrowAction !== null) {
         return bestGrowAction;
     }
-    const freeSeedAction = getFreeSeed(game);
+    const freeSeedAction = getHighestRichnessFreeSeedAction(game);
     if (freeSeedAction !== null) {
         return freeSeedAction;
     }
@@ -45,27 +45,6 @@ const getGrowActionWithBestSunPointPayoff = (game: Game): Action | null => {
 
     return bestTree?.getNextAction() || null;
 };
-
-const getFreeSeed = (game: Game): Action | null => {
-    const { myPlayer } = game;
-    const myTrees = myPlayer.getTrees();
-    for (let i = 0; i < myTrees.length; i++) {
-        const tree = myTrees[i];
-        if (!tree.isDormant) {
-            if (calculateTreeActionCost(myTrees, "SEED", tree) === 0) {
-                const freeCells = findCellsWithinDistance(game.cells, tree.cellIndex, 1).filter(cell => !cell.isOccupied && cell.richness > 0);
-                if (freeCells.length === 0) {
-                    continue;
-                }
-                return new Action("SEED", tree.cellIndex, freeCells[0].index)
-            }
-            
-        }
-    }
-    
-    return null;
-
-}
 
 export default getActionForSunPointSaverStrategy;
 
