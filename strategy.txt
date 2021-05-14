@@ -18,6 +18,7 @@ Add a phase 1.5 in here that prioritizes growing in richer areas
 2. Point scoring phase (completing trees ftw)
  - This is pretty much the same as the strategy that got us out of Wood league, except prioritize largest trees first since they're closest to completion
  - Optimizations:
+	- update getActionForCompleteTreesStrategy to calculate how many sun points it needs fully complete all trees. Then wait until the last possible turn complete everything so we can continue to collect sun points.
     - consider switching to complete phase based on board rather than % of game complete. E.g. N spaces are taken and it'd be better to start collection.
 	- consider prioritizing completing trees that will be blocked the next turn
     - think about how to save sun points for future days, right now the algo goes wide across many trees but we may want to go deep
@@ -27,6 +28,7 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
+- (502 Silver -> 253 Silver) Complete size 3 trees early if there'd be too many wasted days
 - (716 Silver -> 502 Silver) Don't seed if there are two or more occupied adjacent cells
 - (880 Silver -> 716 Silver) Seed on the cell with the highest richness. Seed based on tree size rather than just 1 distance away.
 - (1255 Silver -> 880 Silver) Fix deepcopying bug. 
