@@ -46,8 +46,10 @@ export default class Cell {
   toString = () => JSON.stringify(this);
 
   equals = (other: Cell): boolean =>
+    !!other &&
     this.index === other.index &&
     this.richness === other.richness &&
     this.neighbors.length === other.neighbors.length &&
-    this.neighbors.every((value, index) => value === other.neighbors[index]);
+    this.neighbors.every((value, index) => value === other.neighbors[index]) &&
+    (this.tree ? this.tree.equals(other.tree) : !other.tree);
 }

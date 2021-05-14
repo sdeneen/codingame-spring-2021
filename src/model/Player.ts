@@ -52,6 +52,7 @@ export default class Player {
   toString = () => JSON.stringify(this);
 
   equals = (other: Player): boolean =>
+    !!other &&
     this.sunPoints === other.sunPoints &&
     this.score === other.score &&
     this.isAsleep === other.isAsleep &&
