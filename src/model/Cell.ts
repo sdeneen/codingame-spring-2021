@@ -1,3 +1,5 @@
+import Tree from "./Tree";
+
 export default class Cell {
     index: number;
     richness: number;
@@ -10,6 +12,8 @@ export default class Cell {
      */
     neighbors: [number, number, number, number, number, number];
 
+    tree: Tree | null;
+
     constructor(
         index: number,
         richness: number,
@@ -18,10 +22,16 @@ export default class Cell {
         this.index = index;
         this.richness = richness;
         this.neighbors = neighbors;
+        this.isOccupied = false;
+        this.tree = null;
     }
 
     setOccupied = () => { 
         this.isOccupied = true
+    }
+
+    setTree = (tree: Tree) => {
+        this.tree = tree;
     }
 
     /**

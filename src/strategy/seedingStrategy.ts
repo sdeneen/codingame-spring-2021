@@ -36,6 +36,7 @@ const getFreeSeedActions = (game: Game): Action[] => {
 }
 
 const filterOutCrowdedCells = (game: Game, seedableCells: Cell[]): Cell[] => {
+    // todo: consider making exceptions for high nutrient cells
     return seedableCells.filter(seedableCell => {
         const numNeighbors = seedableCell.getNeighborCellIndices().filter(cellIndx => game.cells[cellIndx].isOccupied).length;
         return numNeighbors < 2;
