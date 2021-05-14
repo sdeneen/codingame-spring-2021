@@ -28,4 +28,12 @@ export default class Cell {
      * Get indices of all cells that neighbor this cell.
      */
     getNeighborCellIndices = () => this.neighbors.filter(neighborIndex => neighborIndex >= 0);
+
+    toString = () => JSON.stringify(this);
+
+    equals = (other: Cell): boolean => this.index === other.index
+        && this.richness === other.richness
+        && this.isOccupied === other.isOccupied
+        && this.neighbors.length === other.neighbors.length
+        && this.neighbors.every((value, index) => value === other.neighbors[index]);
 }

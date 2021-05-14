@@ -33,6 +33,23 @@ const getTreesThatAreBlockedByTreeShadow = (cells: Cell[], allTrees: Tree[], sou
     const cellsInShadow = getCellsInTreeShadow(cells, sourceTree, day);
     const shadowedCellIndices = new Set(cellsInShadow.map(c => c.index));
     return allTrees.filter(t => shadowedCellIndices.has(t.cellIndex) && t.size <= sourceTree.size);
-}
+};
 
-export { getCellsInTreeShadow, getTreesThatAreBlockedByTreeShadow };
+/**
+ * Finds all trees that are blocked by any other tree's shadow on the given day.
+ */
+const getAllTreesThatAreBlockedByAnyShadow = (cells: Cell[], allTrees: Tree[], day: number): Tree[] => {
+    const cellIndexToLargestShadow = {};
+    allTrees.forEach(tree => {
+        const cellsInShadow = getCellsInTreeShadow(cells, tree, day);
+        cellsInShadow.forEach(({ index }) => {
+            if (cellIndexToLargestShadow[index] === undefined || cellIndexToLargestShadow[index] < tree.size) {
+                cellIndexToLargestShadow[index] = tree.size;
+            }
+        });
+    });
+
+    return allTrees.filter(tree => cellIndexToLargestShadow[tree.cellIndex] !== undefined && cellIndexToLargestShadow[tree.cellIndex] >= tree.size);
+};
+
+export { getCellsInTreeShadow, getTreesThatAreBlockedByTreeShadow, getAllTreesThatAreBlockedByAnyShadow };

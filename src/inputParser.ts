@@ -2,7 +2,6 @@ import Cell from './model/Cell';
 import Game from './model/Game';
 import Player from "./model/Player";
 import Tree from "./model/Tree";
-import Action from "./model/Action";
 
 // This is a global provided by Codingame
 declare const readline: () => string;
@@ -61,12 +60,11 @@ const parseTurnInput = (cells: Cell[]): Game => {
     const myPlayer = new Player(sun, score, myTrees, false);
     const opponentPlayer = new Player(oppSun, oppScore, opponentTrees, oppIsWaiting);
     const numberOfPossibleActions = parseInt(readline()); // all legal actions
-    const possibleActions = [];
     for (let i = 0; i < numberOfPossibleActions; i++) {
-        readline()
+        readline();
     }
 
-    return new Game(day, nutrients, cells, possibleActions, myPlayer, opponentPlayer);
+    return new Game(day, nutrients, cells, myPlayer, opponentPlayer);
 }
 
 export { parseInitializationInput, parseTurnInput };

@@ -3,11 +3,9 @@ Sick strat let's go.
 Two sequences of play:
 1. Sun gathering phase (engine building)
  - Try to GROW
- 		- (later) Prioritize GROW trees for whichever will get us the most possible sun points next turn
- 	 	- Prioritize low cost
  	 	- Break ties by largest tree
  	 	- (later) Break ties by picking whichever blocks more opponent sun points next turn
- - If we can't grow anything, SEED somewhere if's free:
+ - If we can't grow anything, SEED somewhere if it's free:
  		- position to block (maybe prioritize diagnols so we can't block ourselves)
 
 Optimizations:
@@ -23,3 +21,9 @@ Add a phase 1.5 in here that prioritizes growing in richer areas
 
 Tips:
 - don't forget to check for richness = 0, which are cells that aren't usable
+
+Changelog (reverse chronological order):
+FORMAT: (rankBefore -> rankAfter) Description of the change
+- (1255 Silver -> 1891 Silver) Fix deepcopying bug. No clue how the bug was helping us :/
+- (1140 Silver -> 1074 Silver) Prioritize GROW trees for whichever results in us having the most sun points at the start of action phase in the next day
+- (2052 Silver -> 1140 Silver) Prioritize GROW trees for whichever results in us gaining the most sun points in the next sun collection phase

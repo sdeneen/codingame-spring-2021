@@ -24,6 +24,15 @@ export default class Tree {
         this.isDormant = isDormant;
     }
 
+    getTreeAfterGrow = (): Tree => {
+        if (this.size === LARGEST_TREE_SIZE) {
+            console.error(`Tried to grow a tree of size ${LARGEST_TREE_SIZE} which is not possible`);
+            return this;
+        }
+
+        return new Tree(this.cellIndex, this.size + 1, this.isMine, true);
+    }
+
     getNextAction = (): Action | null => {
         if (this.isDormant) {
             return null;
@@ -32,7 +41,19 @@ export default class Tree {
         if (this.size === LARGEST_TREE_SIZE) {
             return new Action('COMPLETE', null, this.cellIndex);
         }
-        const retAction = new Action('GROW', null, this.cellIndex);
-        return retAction;
+        return new Action('GROW', null, this.cellIndex);
     };
+
+    /**
+     * Return the number of sun points this tree has the capacity to gain during the sun collection phase at the beginning
+     * of each day. This doesn't do any checks to see if it is in a shadow right now
+     */
+    getSunPointGainPerDay = (): number => this.size;
+
+    toString = () => JSON.stringify(this);
+
+    equals = (other: Tree): boolean => this.cellIndex === other.cellIndex
+        && this.size === other.size
+        && this.isMine === other.isMine
+        && this.isDormant === other.isDormant;
 };

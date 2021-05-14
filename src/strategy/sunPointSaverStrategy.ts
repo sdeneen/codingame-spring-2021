@@ -1,15 +1,15 @@
 import Game from "../model/Game";
 import calculateTreeActionCost from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
-import { getTrashTalk } from "../utils/trashTalker";
 import Tree from "../model/Tree";
 import findCellsWithinDistance from "../graphTraversal";
-import Cell from "../model/Cell";
+import determineGameStateAfterGrowAction from "../gameStateManager";
+import calculateSunPointsGainedForDay from "../sunPointCalculator";
 
 const getActionForSunPointSaverStrategy = (game: Game): Action => {
-    const cheapestGrowthAction = getCheapestGrowAction(game);
-    if (cheapestGrowthAction !== null) {
-        return cheapestGrowthAction;
+    const bestGrowAction = getGrowActionWithBestSunPointPayoff(game);
+    if (bestGrowAction !== null) {
+        return bestGrowAction;
     }
     const freeSeedAction = getFreeSeed(game);
     if (freeSeedAction !== null) {
@@ -19,28 +19,36 @@ const getActionForSunPointSaverStrategy = (game: Game): Action => {
     return new Action("WAIT");
 }
 
-const getCheapestGrowAction = (game: Game): Action | null => {
-    const { myPlayer: { sunPoints:mySunPoints, trees:myTrees } } = game;
-    let cheapestTreeToGrow: Tree = null;
-    let cheapestCost: Number = Number.MAX_VALUE;
+const getGrowActionWithBestSunPointPayoff = (game: Game): Action | null => {
+    const { myPlayer } = game;
+    const myTrees = myPlayer.getTrees();
+    const { sunPoints: mySunPoints } = myPlayer;
+    let bestTree: Tree = null;
+    let mostResultingSunPoints: Number = -1;
 
-    for (let i = 0; i < myTrees.length; i++) {
-        const tree = myTrees[i];
+    myTrees.forEach(tree => {
         const nextAction = tree.getNextAction()
         if (nextAction?.type === "GROW") {
             const growthCost = calculateTreeActionCost(myTrees, nextAction.type, tree)
-            if (growthCost <= mySunPoints && growthCost < cheapestCost) {
-                cheapestCost = growthCost;
-                cheapestTreeToGrow = tree;
+            if (growthCost <= mySunPoints) {
+                const newGameState = determineGameStateAfterGrowAction(game, nextAction.targetCellIdx);
+                newGameState.opponentPlayer.sunPoints = -5;
+                const sunPointsAfterCollection = newGameState.myPlayer.sunPoints + calculateSunPointsGainedForDay(newGameState.cells, newGameState.myPlayer, newGameState.getAllTrees(), newGameState.day + 1);
+                // TODO better tie breaking than just going with the first one
+                if (mostResultingSunPoints < sunPointsAfterCollection) {
+                    mostResultingSunPoints = sunPointsAfterCollection;
+                    bestTree = tree;
+                }
             }
         }
-    }
-    
-    return cheapestTreeToGrow?.getNextAction() || null;
-}
+    });
+
+    return bestTree?.getNextAction() || null;
+};
 
 const getFreeSeed = (game: Game): Action | null => {
-    const { myPlayer: { sunPoints:mySunPoints, trees:myTrees } } = game;
+    const { myPlayer } = game;
+    const myTrees = myPlayer.getTrees();
     for (let i = 0; i < myTrees.length; i++) {
         const tree = myTrees[i];
         if (!tree.isDormant) {
