@@ -1,7 +1,7 @@
 import Game from "../model/Game";
 import calculateTreeActionCost from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
-import Tree from "../model/Tree";
+import Tree, { SEED_TREE_SIZE, SMALL_TREE_SIZE } from "../model/Tree";
 import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
 import { getBestSeedAction } from "./seedingStrategy";
@@ -51,11 +51,16 @@ const getGrowActionWithBestSunPointPayoff = (
 ): Action | null => {
   const { myPlayer } = game;
   const myTrees = myPlayer.getTrees();
+  const tooManySmallTrees: boolean =
+    myTrees.filter((tree) => tree.size === SMALL_TREE_SIZE).length >= 1;
   const { sunPoints: mySunPoints } = myPlayer;
   let bestTree: Tree = null;
   let mostResultingSunPoints: Number = -1;
 
   myTrees.forEach((tree) => {
+    if (tooManySmallTrees && tree.size === SEED_TREE_SIZE) {
+      return;
+    }
     const nextAction = tree.getNextAction();
     if (nextAction?.type === "GROW") {
       const growthCost = calculateTreeActionCost(
