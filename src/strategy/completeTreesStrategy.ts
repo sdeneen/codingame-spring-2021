@@ -51,18 +51,24 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
  *       future days to be spooked
  */
 const getCompleteActionForSpookedTrees = (game: Game): Action | null => {
-  if (game.myPlayer.sunPoints >= COST_TO_COMPLETE_TREE) {
-    const wastedTrees = getAllWastedTrees(game, 2);
+  const wastedTrees = getAllWastedTrees(game, 2);
+  const affordableWastedTrees = wastedTrees.filter(
+    (tree) =>
+      calculateTreeActionCost(
+        game.myPlayer.getTrees(),
+        tree.getNextAction().type,
+        tree
+      ) <= game.myPlayer.sunPoints
+  );
 
-    if (wastedTrees.length !== 0) {
-      return wastedTrees
-        .reduce((t1, t2) =>
-          game.cells[t1.cellIndex].richness > game.cells[t2.cellIndex].richness
-            ? t1
-            : t2
-        )
-        .getNextAction();
-    }
+  if (affordableWastedTrees.length !== 0) {
+    return affordableWastedTrees
+      .reduce((t1, t2) =>
+        game.cells[t1.cellIndex].richness > game.cells[t2.cellIndex].richness
+          ? t1
+          : t2
+      )
+      .getNextAction();
   }
 
   return null;
