@@ -9,8 +9,8 @@ data driven algorithm to complete in a good way
 
 
 Concrete ideas:
-1. During phase 1 or 2, if one of our large trees is gonna block another one of our trees, COMPLETE it (maybe limit to high richness)
-2. Update SEED algo to aim for "L" shapes to avoid blocking ourselves
+1. Complete Earlier: Max out each size tree at a different limit (i.e. 1 size 1, 2 size 2's, 3 size 3's). If we are at all our limits, COMPLETE (can write a state manager func to see which COMPLETE leaves us with the most sun points in the next N turns)
+2. Complete Earlier: During phase 1 and/or 2, if one of our large trees is gonna block another one of our trees, COMPLETE it (maybe limit to high richness)
 
 
 ==== Old =====
@@ -43,7 +43,8 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
-- (713 Gold -> 325) Max small trees === 1
+- (306 Gold -> 202) Update seeding algo to check for potential blockages since the "L" strategy doesn't fully stop us from blocking ourselves
+- (713 Gold -> 325 Gold) Max small trees === 1
 - (1135 Gold -> 713 Gold) "L" strategy for seeding to avoid blocking ourselves most of the time
 - (221 Silver - GOLD!!!!) 2 actions per day during end game. seed from size 2+ trees only.
 - (303 Silver -> 221 Silver) Spooked tree checker includes size 2 and size 3 trees. Seed logic is preferred over grow for same tree if seed is in high richness

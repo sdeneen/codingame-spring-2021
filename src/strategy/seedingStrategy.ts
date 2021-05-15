@@ -4,11 +4,24 @@ import calculateTreeActionCost, {
 } from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import findCellsWithinDistance from "../graphTraversal";
-import Cell, { HIGH_RICHNESS, UNUSABLE_RICHNESS } from "../model/Cell";
-import Tree, { MEDIUM_TREE_SIZE } from "../model/Tree";
+import Cell, {
+  HIGH_RICHNESS,
+  LOW_RICHNESS,
+  MEDIUM_RICHNESS,
+  UNUSABLE_RICHNESS,
+} from "../model/Cell";
+import Tree, { LARGEST_TREE_SIZE, MEDIUM_TREE_SIZE } from "../model/Tree";
 import StaticCellData from "../model/StaticCellData";
-import DirectionDistanceTracker from "../model/DirectionDistanceTracker";
 import { NUM_DIRECTIONS } from "../miscConstants";
+import { getTreesInGivenShadow, TreeWithDistance } from "../shadowObserver";
+
+const getInverseDistanceSumForTreesWithDistance = (
+  treesWithDistance: TreeWithDistance[]
+): number =>
+  treesWithDistance.reduce<number>(
+    (sumSoFar, treeWithDistance) => sumSoFar + 1 / treeWithDistance.distance,
+    0
+  );
 
 /**
  * Only allows free seed actions.
@@ -21,24 +34,62 @@ const getBestSeedAction = (
   game: Game
 ): Action | null => {
   const { cells, myPlayer } = game;
+  const { directionDistanceTracker } = staticCellData;
   const myTrees = myPlayer.getTrees();
   const seedCost = calculateSeedCost(myTrees);
   if (seedCost > 0) {
     return null;
   }
 
-  const seedActions = findSeedActionsUsingTheLStrategy(
-    staticCellData.directionDistanceTracker,
-    cells,
-    myTrees
-  );
-  if (seedActions.length === 0) {
-    // TODO consider seeding a high richness cell even if it doesn't follow the L strategy
+  const seedActions = findSeedActionsUsingTheLStrategy(cells, myTrees);
+  const filteredSeedActions = seedActions.filter((action) => {
+    const targetCell = cells[action.targetCellIdx];
+    const numOccupiedNeighbors = targetCell
+      .getNeighborCellIndices()
+      .filter((i) => cells[i].isOccupied()).length;
+
+    const potentialTreesToBlock = getTreesInGivenShadow(
+      directionDistanceTracker,
+      cells,
+      myTrees,
+      targetCell.index,
+      LARGEST_TREE_SIZE
+    );
+    // Higher distance is better (less likely to block), so we sum up the inverse
+    const inverseDistanceSum = getInverseDistanceSumForTreesWithDistance(
+      potentialTreesToBlock
+    );
+
+    // Some helper math to provide some context for the numbers we check below:
+    // blocking two distance 3's, two distance 2's, and a distance 1: 2 and 2/3
+    // blocking two distance 1's = 2
+    // blocking a distance 1, 2, and 3 = 1 and 5/6
+    // blocking two distance 3's = 2/3
+    if (targetCell.richness === HIGH_RICHNESS) {
+      return inverseDistanceSum <= 4;
+    }
+    if (targetCell.richness === MEDIUM_RICHNESS) {
+      return inverseDistanceSum <= 3;
+    }
+    if (targetCell.richness === LOW_RICHNESS) {
+      return inverseDistanceSum <= 2;
+    }
+
+    return false;
+  });
+
+  if (filteredSeedActions.length === 0) {
+    // TODO consider seeding a high richness cell even if it doesn't follow the L strategy, especially later game
+    // could fallback to old seeding strategy here, but seems risky for blockage
     return null;
   }
 
-  return seedActions.reduce((action1, action2) => {
+  return filteredSeedActions.reduce((action1, action2) => {
     // TODO we could consider the source cell as well (i.e. pick source cells we wouldn't want to grow as much today)
+    if (action1.targetCellIdx === action2.targetCellIdx) {
+      return action2;
+    }
+
     const targetCell1 = cells[action1.targetCellIdx];
     const targetCell2 = cells[action2.targetCellIdx];
     const numOccupiedNeighbors1 = targetCell1
@@ -49,16 +100,39 @@ const getBestSeedAction = (
       .filter((i) => cells[i].isOccupied()).length;
     const richness1 = targetCell1.richness;
     const richness2 = targetCell2.richness;
-    // Evenly weight the difference between richness and the difference between the number of occupied neighbors
+
+    const potentialTreesToBlock1 = getTreesInGivenShadow(
+      directionDistanceTracker,
+      cells,
+      myTrees,
+      targetCell1.index,
+      LARGEST_TREE_SIZE
+    );
+    const potentialTreesToBlock2 = getTreesInGivenShadow(
+      directionDistanceTracker,
+      cells,
+      myTrees,
+      targetCell2.index,
+      LARGEST_TREE_SIZE
+    );
+    // Higher distance is better (less likely to block), so we sum up the inverse
+    const inverseDistanceSum1 = getInverseDistanceSumForTreesWithDistance(
+      potentialTreesToBlock1
+    );
+    const inverseDistanceSum2 = getInverseDistanceSumForTreesWithDistance(
+      potentialTreesToBlock2
+    );
+
+    // Evenly weight the difference between richness and the difference between the number of occupied neighbors and the difference between distance inverse sum
     // TODO this could be improved. Also should there be a tie breaker here? Probably based on source cell
-    return richness1 - numOccupiedNeighbors1 > richness2 - numOccupiedNeighbors2
+    return richness1 - numOccupiedNeighbors1 - inverseDistanceSum1 >
+      richness2 - numOccupiedNeighbors2 - inverseDistanceSum2
       ? action1
       : action2;
   });
 };
 
 const findSeedActionsUsingTheLStrategy = (
-  distanceTracker: DirectionDistanceTracker,
   allCells: Cell[],
   allMyTrees: Tree[]
 ): Action[] => {

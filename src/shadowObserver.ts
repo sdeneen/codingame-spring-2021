@@ -5,6 +5,15 @@ import DirectionDistanceTracker from "./model/DirectionDistanceTracker";
 import { Direction, ShadowDistance } from "./miscTypes";
 
 /**
+ * A tree with a known distance from some other cell
+ */
+export interface TreeWithDistance {
+  tree: Tree;
+  fromCellIndex: number;
+  distance: ShadowDistance;
+}
+
+/**
  * Finds all cells that the sourceTree casts a shadow on when it is the given day.
  */
 const getCellsInTreeShadow = (
@@ -113,7 +122,9 @@ const getTreesThatCastSpookyShadowOnTree = (
 
 /**
  * Note: the trees returned aren't necessarily spooked by the given shadow. This just checks if
- * the shadow reaches their cell
+ * the shadow reaches their cell.
+ *
+ * Includes a distance for each returned tree which is how far away that tree is from the shadow source cell
  */
 const getTreesInGivenShadow = (
   distanceTracker: DirectionDistanceTracker,
@@ -121,15 +132,31 @@ const getTreesInGivenShadow = (
   treesToCheck: Tree[],
   shadowSourceCellIndex: number,
   shadowSize: ShadowDistance
-): Tree[] => {
-  const indicesOfCellsWithinShadow =
+): TreeWithDistance[] => {
+  const cellIndexToTree = {};
+  treesToCheck.map((tree) => (cellIndexToTree[tree.cellIndex] = tree));
+  const distanceToCellIndicesWithinShadow =
     distanceTracker.getCellIndiciesWithinDistanceInAnyDirection(
       shadowSourceCellIndex,
       shadowSize
     );
-  return indicesOfCellsWithinShadow
-    .map((i) => allCells[i].tree)
-    .filter((tree) => tree !== null);
+
+  const treesWithDistanceInShadow = [];
+  distanceToCellIndicesWithinShadow.forEach((cellIndices, distanceIndex) => {
+    const distance = distanceIndex + 1;
+    cellIndices.forEach((cellIndex) => {
+      const tree = cellIndexToTree[cellIndex];
+      if (!!tree) {
+        treesWithDistanceInShadow.push({
+          tree,
+          fromCellIndex: shadowSourceCellIndex,
+          distance,
+        });
+      }
+    });
+  });
+
+  return treesWithDistanceInShadow;
 };
 
 const getOppositeDirectionOfSun = (day: number) => {
