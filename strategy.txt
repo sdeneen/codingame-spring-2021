@@ -1,12 +1,27 @@
 Sick strat let's go.
 
+General themes:
+1. We have to complete more earlier.
+2. Figure out completion strategy at the end. Doing a slow rollout of 2 completions per turn performed better than waiting until the last turn to complete everything. Find a more
+data driven algorithm to complete in a good way
+3. Start thinking about blocking opponent
+4. Look at TODOs for optimizations in existing algo
+
+
+Concrete ideas:
+1. During phase 1 or 2, if one of our large trees is gonna block another one of our trees, COMPLETE it (maybe limit to high richness)
+2. Update SEED algo to aim for "L" shapes to avoid blocking ourselves
+
+
+==== Old =====
+
 Two sequences of play:
 1. Sun gathering phase (engine building)
  - Try to GROW
  	 	- Break ties by largest tree
  	 	- (later) Break ties by picking whichever blocks more opponent sun points next turn
  - If we can't grow anything, SEED somewhere if it's free:
- 		- position to block (maybe prioritize diagnols so we can't block ourselves)
+ 		- position to block (maybe prioritize diagnols, aka "L" shapes, so we can't block ourselves)
 		- Prefer areas with higher richness
 		- Seed the biggest tree to spread across the forest - prevents blocking ourselves and makes it hardest for opponent
 
