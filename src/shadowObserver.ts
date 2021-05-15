@@ -2,7 +2,7 @@ import Tree, { LARGEST_TREE_SIZE } from "./model/Tree";
 import Cell from "./model/Cell";
 import { NUM_DIRECTIONS } from "./miscConstants";
 import DirectionDistanceTracker from "./model/DirectionDistanceTracker";
-import { Direction } from "./miscTypes";
+import { Direction, ShadowDistance } from "./miscTypes";
 
 /**
  * Finds all cells that the sourceTree casts a shadow on when it is the given day.
@@ -111,6 +111,27 @@ const getTreesThatCastSpookyShadowOnTree = (
   return treesCastingSpookyShadows;
 };
 
+/**
+ * Note: the trees returned aren't necessarily spooked by the given shadow. This just checks if
+ * the shadow reaches their cell
+ */
+const getTreesInGivenShadow = (
+  distanceTracker: DirectionDistanceTracker,
+  allCells: Cell[],
+  treesToCheck: Tree[],
+  shadowSourceCellIndex: number,
+  shadowSize: ShadowDistance
+): Tree[] => {
+  const indicesOfCellsWithinShadow =
+    distanceTracker.getCellIndiciesWithinDistanceInAnyDirection(
+      shadowSourceCellIndex,
+      shadowSize
+    );
+  return indicesOfCellsWithinShadow
+    .map((i) => allCells[i].tree)
+    .filter((tree) => tree !== null);
+};
+
 const getOppositeDirectionOfSun = (day: number) => {
   const sunDirectionOnDay: number = day % NUM_DIRECTIONS;
   const indicesForOppositeDirection = NUM_DIRECTIONS / 2;
@@ -119,6 +140,7 @@ const getOppositeDirectionOfSun = (day: number) => {
 
 export {
   getCellsInTreeShadow,
+  getTreesInGivenShadow,
   getTreesThatAreBlockedByTreeShadow,
   getAllTreesThatAreBlockedByAnyShadow,
   getTreesThatCastSpookyShadowOnTree,

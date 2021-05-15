@@ -2,8 +2,35 @@ import cellsData from "./data/CellsData";
 import DirectionDistanceTracker from "../src/model/DirectionDistanceTracker";
 import { NUM_DIRECTIONS } from "../src/miscConstants";
 
+const assertDistanceTrackerWorksWithoutDirection = (
+  tracker,
+  fromCellIndex,
+  maxDistance,
+  directionToExpectedCellIndices
+) => {
+  const allCellIndiciesWithinDistance =
+    tracker.getCellIndiciesWithinDistanceInAnyDirection(
+      fromCellIndex,
+      maxDistance
+    );
+  const expectedAllCellIndiciesWithinDistance =
+    directionToExpectedCellIndices.reduce(
+      (set1, set2) => new Set([...Array.from(set1), ...Array.from(set2)])
+    );
+
+  expect(allCellIndiciesWithinDistance).toHaveLength(
+    expectedAllCellIndiciesWithinDistance.size
+  );
+  expect(
+    allCellIndiciesWithinDistance.every((i) =>
+      expectedAllCellIndiciesWithinDistance.has(i)
+    )
+  );
+};
+
 test("it calculates cells in directions for center cell up to distance 3", () => {
   const centerCellIndex = 0;
+  const maxDistance = 3;
   const tracker = new DirectionDistanceTracker(cellsData);
   const directionToExpectedCellIndices = [
     new Set([1, 7, 19]),
@@ -19,7 +46,7 @@ test("it calculates cells in directions for center cell up to distance 3", () =>
         centerCellIndex,
         // @ts-ignore - direction is always less than 6
         direction,
-        3
+        maxDistance
       );
     const expectedCellIndices = directionToExpectedCellIndices[direction];
     expect(direction0CellsWithin3.length).toEqual(expectedCellIndices.size);
@@ -27,10 +54,18 @@ test("it calculates cells in directions for center cell up to distance 3", () =>
       direction0CellsWithin3.every((index) => expectedCellIndices.has(index))
     );
   }
+
+  assertDistanceTrackerWorksWithoutDirection(
+    tracker,
+    centerCellIndex,
+    maxDistance,
+    directionToExpectedCellIndices
+  );
 });
 
 test("it calculates cells in directions for center cell up to distance 2", () => {
   const centerCellIndex = 0;
+  const maxDistance = 2;
   const tracker = new DirectionDistanceTracker(cellsData);
   const directionToExpectedCellIndices = [
     new Set([1, 7]),
@@ -46,7 +81,7 @@ test("it calculates cells in directions for center cell up to distance 2", () =>
         centerCellIndex,
         // @ts-ignore - direction is always less than 6
         direction,
-        2
+        maxDistance
       );
     const expectedCellIndices = directionToExpectedCellIndices[direction];
     expect(direction0CellsWithin2.length).toEqual(expectedCellIndices.size);
@@ -54,10 +89,18 @@ test("it calculates cells in directions for center cell up to distance 2", () =>
       direction0CellsWithin2.every((index) => expectedCellIndices.has(index))
     );
   }
+
+  assertDistanceTrackerWorksWithoutDirection(
+    tracker,
+    centerCellIndex,
+    maxDistance,
+    directionToExpectedCellIndices
+  );
 });
 
 test("it calculates cells in directions for cell close to edge up to distance 3", () => {
   const sourceCellIndex = 13;
+  const maxDistance = 3;
   const tracker = new DirectionDistanceTracker(cellsData);
   const directionToExpectedCellIndices = [
     new Set([4, 0, 1]),
@@ -73,7 +116,7 @@ test("it calculates cells in directions for cell close to edge up to distance 3"
         sourceCellIndex,
         // @ts-ignore - direction is always less than 6
         direction,
-        3
+        maxDistance
       );
     const expectedCellIndices = directionToExpectedCellIndices[direction];
     expect(direction0CellsWithin3.length).toEqual(expectedCellIndices.size);
@@ -81,4 +124,11 @@ test("it calculates cells in directions for cell close to edge up to distance 3"
       direction0CellsWithin3.every((index) => expectedCellIndices.has(index))
     );
   }
+
+  assertDistanceTrackerWorksWithoutDirection(
+    tracker,
+    sourceCellIndex,
+    maxDistance,
+    directionToExpectedCellIndices
+  );
 });

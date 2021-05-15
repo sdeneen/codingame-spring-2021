@@ -1,5 +1,5 @@
 import { NUM_DIRECTIONS } from "../miscConstants";
-import { Direction, Distance } from "../miscTypes";
+import { Direction, ShadowDistance } from "../miscTypes";
 import Cell from "./Cell";
 
 // cell indices at distance 1, 2, and 3 away from some source cell in the same direction
@@ -32,6 +32,21 @@ const calculateCellIndexDistanceMapping = (cells: Cell[]) => {
   return cellIndexToCellsAtDistancePerDirection;
 };
 
+const getCellIndicesWithinDistance = (
+  cellsAtDistance: CellsAtDistance,
+  maxDistance: number
+) => {
+  const cellIndicesToReturn = [];
+  for (let distance = 1; distance <= maxDistance; distance++) {
+    const cellIndex = cellsAtDistance[distance - 1];
+    if (cellIndex >= 0) {
+      cellIndicesToReturn.push(cellIndex);
+    }
+  }
+
+  return cellIndicesToReturn;
+};
+
 /**
  * For every cell C, keeps track of how far other cells are from C in each direction (i.e. a straight line), up
  * to LARGEST_TREE_SIZE away since we don't care about cells that are farther away than that.
@@ -61,17 +76,29 @@ export default class DirectionDistanceTracker {
   getCellIndiciesInDirectionWithinDistance = (
     fromCellIndex: number,
     direction: Direction,
-    maxDistance: Distance
+    maxDistance: ShadowDistance
   ): number[] => {
     const cellsAtDistance =
       this.cellIndexToCellsAtDistancePerDirection[fromCellIndex][direction];
+    return getCellIndicesWithinDistance(cellsAtDistance, maxDistance);
+  };
+
+  /**
+   * Returns cell indices that are up to {maxDistance} cells away from the cell at {fromCellIndex},
+   * in any direction.
+   */
+  getCellIndiciesWithinDistanceInAnyDirection = (
+    fromCellIndex: number,
+    maxDistance: ShadowDistance
+  ): number[] => {
     const cellIndicesToReturn = [];
-    for (let distance = 1; distance <= maxDistance; distance++) {
-      const cellIndex = cellsAtDistance[distance - 1];
-      if (cellIndex >= 0) {
-        cellIndicesToReturn.push(cellIndex);
+    this.cellIndexToCellsAtDistancePerDirection[fromCellIndex].forEach(
+      (cellsAtDistance) => {
+        cellIndicesToReturn.push(
+          ...getCellIndicesWithinDistance(cellsAtDistance, maxDistance)
+        );
       }
-    }
+    );
 
     return cellIndicesToReturn;
   };
