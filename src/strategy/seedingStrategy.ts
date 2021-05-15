@@ -3,6 +3,7 @@ import calculateTreeActionCost from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import findCellsWithinDistance from "../graphTraversal";
 import Cell, { HIGH_RICHNESS, UNUSABLE_RICHNESS } from "../model/Cell";
+import { MEDIUM_TREE_SIZE } from "../model/Tree";
 
 const getHighestRichnessFreeSeedAction = (game: Game): Action | null => {
   const freeSeedActions = getFreeSeedActions(game);
@@ -22,10 +23,13 @@ const getHighestRichnessFreeSeedAction = (game: Game): Action | null => {
 const getFreeSeedActions = (game: Game): Action[] => {
   const { myPlayer } = game;
   const myTrees = myPlayer.getTrees();
+  const mediumPlusTrees = myTrees.filter(
+    (tree) => tree.size >= MEDIUM_TREE_SIZE
+  );
   let seedActions: Action[] = [];
 
-  for (let i = 0; i < myTrees.length; i++) {
-    const tree = myTrees[i];
+  for (let i = 0; i < mediumPlusTrees.length; i++) {
+    const tree = mediumPlusTrees[i];
     if (!tree.isDormant) {
       if (calculateTreeActionCost(myTrees, "SEED", tree) === 0) {
         const freeCells = findCellsWithinDistance(
