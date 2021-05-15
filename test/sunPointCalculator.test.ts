@@ -6,6 +6,7 @@ import Tree, {
 } from "../src/model/Tree";
 import cellsData from "./data/CellsData";
 import Player from "../src/model/Player";
+import DirectionDistanceTracker from "../src/model/DirectionDistanceTracker";
 
 const getMockTree = (index, size, isMine = true) =>
   new Tree(index, size, isMine, false);
@@ -13,7 +14,9 @@ const getMockTree = (index, size, isMine = true) =>
 test("it calculates sun points for no trees", () => {
   const allTrees = [];
   const myPlayer = new Player(0, 0, [], false);
+  const tracker = new DirectionDistanceTracker(cellsData);
   const sunPointsGained = calculateSunPointsGainedForDay(
+    tracker,
     cellsData,
     myPlayer,
     allTrees,
@@ -23,6 +26,7 @@ test("it calculates sun points for no trees", () => {
 });
 
 test("it calculates sun points for some trees", () => {
+  const tracker = new DirectionDistanceTracker(cellsData);
   const allTrees = [
     getMockTree(0, LARGE_TREE_SIZE),
     getMockTree(19, LARGE_TREE_SIZE, false), // blocked
@@ -41,6 +45,7 @@ test("it calculates sun points for some trees", () => {
   );
 
   const sunPointsGained = calculateSunPointsGainedForDay(
+    tracker,
     cellsData,
     myPlayer,
     allTrees,

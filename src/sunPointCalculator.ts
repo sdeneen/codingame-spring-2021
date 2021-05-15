@@ -2,18 +2,21 @@ import Player from "./model/Player";
 import { getAllTreesThatAreBlockedByAnyShadow } from "./shadowObserver";
 import Tree from "./model/Tree";
 import Cell from "./model/Cell";
+import DirectionDistanceTracker from "./model/DirectionDistanceTracker";
 
 /**
  * Given the game state, calculate how many sun points the given player earns in the sun collection phase at the start
  * of the day.
  */
 const calculateSunPointsGainedForDay = (
+  sameDirectionDistanceTracker: DirectionDistanceTracker,
   cells: Cell[],
   player: Player,
   allTrees: Tree[],
   day: number
 ) => {
   const blockedCells = getAllTreesThatAreBlockedByAnyShadow(
+    sameDirectionDistanceTracker,
     cells,
     allTrees,
     day

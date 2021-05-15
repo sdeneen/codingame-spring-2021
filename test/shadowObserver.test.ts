@@ -9,19 +9,22 @@ import Tree, {
   LARGE_TREE_SIZE,
   MEDIUM_TREE_SIZE,
 } from "../src/model/Tree";
+import DirectionDistanceTracker from "../src/model/DirectionDistanceTracker";
 
 const getMockTree = (index, size) => new Tree(index, size, true, false);
 
 test("it gets cell in small tree shadow", () => {
   const tree = getMockTree(0, SMALL_TREE_SIZE);
-  const shadowedCells = getCellsInTreeShadow(cellsData, tree, 0);
+  const tracker = new DirectionDistanceTracker(cellsData);
+  const shadowedCells = getCellsInTreeShadow(tracker, cellsData, tree, 0);
   expect(shadowedCells).toHaveLength(SMALL_TREE_SIZE);
   expect(shadowedCells[0].index).toEqual(1);
 });
 
 test("it gets cells in large tree shadow", () => {
   const tree = getMockTree(0, LARGE_TREE_SIZE);
-  const shadowedCells = getCellsInTreeShadow(cellsData, tree, 2);
+  const tracker = new DirectionDistanceTracker(cellsData);
+  const shadowedCells = getCellsInTreeShadow(tracker, cellsData, tree, 2);
   expect(shadowedCells).toHaveLength(LARGE_TREE_SIZE);
   expect(shadowedCells[0].index).toEqual(3);
   expect(shadowedCells[1].index).toEqual(11);
@@ -30,12 +33,14 @@ test("it gets cells in large tree shadow", () => {
 
 test("it gets cells in medium tree shadow off board", () => {
   const tree = getMockTree(7, LARGE_TREE_SIZE);
-  const shadowedCells = getCellsInTreeShadow(cellsData, tree, 0);
+  const tracker = new DirectionDistanceTracker(cellsData);
+  const shadowedCells = getCellsInTreeShadow(tracker, cellsData, tree, 0);
   expect(shadowedCells).toHaveLength(1);
   expect(shadowedCells[0].index).toEqual(19);
 });
 
 test("it gets smaller trees that are blocked by shadow", () => {
+  const tracker = new DirectionDistanceTracker(cellsData);
   const sourceTree = new Tree(0, LARGE_TREE_SIZE, true, true);
   const allTrees = [
     sourceTree,
@@ -50,6 +55,7 @@ test("it gets smaller trees that are blocked by shadow", () => {
   ];
 
   const blockedTrees = getTreesThatAreBlockedByTreeShadow(
+    tracker,
     cellsData,
     allTrees,
     sourceTree,
@@ -65,6 +71,7 @@ test("it gets smaller trees that are blocked by shadow", () => {
 });
 
 test("it larger trees are not blocked by shadow", () => {
+  const tracker = new DirectionDistanceTracker(cellsData);
   const sourceTree = new Tree(0, SMALL_TREE_SIZE, true, true);
   const allTrees = [
     sourceTree,
@@ -74,6 +81,7 @@ test("it larger trees are not blocked by shadow", () => {
   ];
 
   const blockedTrees = getTreesThatAreBlockedByTreeShadow(
+    tracker,
     cellsData,
     allTrees,
     sourceTree,
@@ -93,7 +101,9 @@ test("it gets all trees that are blocked by any shadow", () => {
     getMockTree(30, SMALL_TREE_SIZE),
   ];
   const expectedBlockedTreeIndices = new Set([19, 8]);
+  const tracker = new DirectionDistanceTracker(cellsData);
   const blockedTrees = getAllTreesThatAreBlockedByAnyShadow(
+    tracker,
     cellsData,
     allTrees,
     0

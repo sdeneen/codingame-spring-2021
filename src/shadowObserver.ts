@@ -1,46 +1,50 @@
 import Tree, { LARGEST_TREE_SIZE } from "./model/Tree";
 import Cell from "./model/Cell";
 import { NUM_DIRECTIONS } from "./miscConstants";
-import Game from "./model/Game";
+import DirectionDistanceTracker from "./model/DirectionDistanceTracker";
+import { Direction } from "./miscTypes";
 
 /**
  * Finds all cells that the sourceTree casts a shadow on when it is the given day.
  */
 const getCellsInTreeShadow = (
-  cells: Cell[],
+  sameDirectionDistanceTracker: DirectionDistanceTracker,
+  allCells: Cell[],
   sourceTree: Tree,
   day: number
 ): Cell[] => {
-  const sunDirection = day % NUM_DIRECTIONS;
-  let remainingShadowCells = sourceTree.size;
-  const cellsInShadow = [];
-  let curCell = cells[sourceTree.cellIndex];
-  while (remainingShadowCells > 0) {
-    const neighborIndex = curCell.neighbors[sunDirection];
-    if (neighborIndex < 0) {
-      // We've reached the edge of the board, so just return what we have
-      return cellsInShadow;
-    }
-
-    // This cell is in the shadow!
-    curCell = cells[neighborIndex];
-    cellsInShadow.push(curCell);
-    remainingShadowCells--;
+  const sunDirection = (day % NUM_DIRECTIONS) as Direction;
+  const { size } = sourceTree;
+  if (size === 0) {
+    // Seeds have no shadow
+    return [];
   }
-
-  return cellsInShadow;
+  const cellsIndiciesInShadow =
+    sameDirectionDistanceTracker.getCellIndiciesInDirectionWithinDistance(
+      sourceTree.cellIndex,
+      sunDirection,
+      // @ts-ignore - size always <= 3
+      size
+    );
+  return cellsIndiciesInShadow.map((i) => allCells[i]);
 };
 
 /**
  * Finds all trees that will not get sun on the given day becauase they are in {sourceTree} tree's shadow.
  */
 const getTreesThatAreBlockedByTreeShadow = (
+  sameDirectionDistanceTracker: DirectionDistanceTracker,
   cells: Cell[],
   allTrees: Tree[],
   sourceTree: Tree,
   day: number
 ): Tree[] => {
-  const cellsInShadow = getCellsInTreeShadow(cells, sourceTree, day);
+  const cellsInShadow = getCellsInTreeShadow(
+    sameDirectionDistanceTracker,
+    cells,
+    sourceTree,
+    day
+  );
   const shadowedCellIndices = new Set(cellsInShadow.map((c) => c.index));
   return allTrees.filter(
     (t) => shadowedCellIndices.has(t.cellIndex) && t.size <= sourceTree.size
@@ -51,13 +55,19 @@ const getTreesThatAreBlockedByTreeShadow = (
  * Finds all trees that are blocked by any other tree's shadow on the given day.
  */
 const getAllTreesThatAreBlockedByAnyShadow = (
+  sameDirectionDistanceTracker: DirectionDistanceTracker,
   cells: Cell[],
   allTrees: Tree[],
   day: number
 ): Tree[] => {
   const cellIndexToLargestShadow = {};
   allTrees.forEach((tree) => {
-    const cellsInShadow = getCellsInTreeShadow(cells, tree, day);
+    const cellsInShadow = getCellsInTreeShadow(
+      sameDirectionDistanceTracker,
+      cells,
+      tree,
+      day
+    );
     cellsInShadow.forEach(({ index }) => {
       if (
         cellIndexToLargestShadow[index] === undefined ||

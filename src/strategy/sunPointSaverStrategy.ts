@@ -5,17 +5,24 @@ import Tree from "../model/Tree";
 import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
 import { getHighestRichnessFreeSeedAction } from "./seedingStrategy";
-import { getCompleteActionForSpookedTrees } from "./completeTreesStrategy";
+import { getGrowOrCompleteActionForSpookedTrees } from "./completeTreesStrategy";
 import { HIGH_RICHNESS } from "../model/Cell";
+import StaticCellData from "../model/StaticCellData";
 
-const getActionForSunPointSaverStrategy = (game: Game): Action => {
-  const bestCompleteAction = getCompleteActionForSpookedTrees(game);
-  if (bestCompleteAction !== null) {
-    console.error("===== Completing early!");
-    return bestCompleteAction;
+const getActionForSunPointSaverStrategy = (
+  game: Game,
+  staticCellData: StaticCellData
+): Action => {
+  const bestGrowOrCompleteAction = getGrowOrCompleteActionForSpookedTrees(game);
+  if (bestGrowOrCompleteAction !== null) {
+    console.error("===== Trying to grow/complete spooked trees early!");
+    return bestGrowOrCompleteAction;
   }
   const freeSeedAction = getHighestRichnessFreeSeedAction(game);
-  const bestGrowAction = getGrowActionWithBestSunPointPayoff(game);
+  const bestGrowAction = getGrowActionWithBestSunPointPayoff(
+    game,
+    staticCellData
+  );
 
   if (
     freeSeedAction !== null &&
@@ -38,7 +45,10 @@ const getActionForSunPointSaverStrategy = (game: Game): Action => {
   return new Action("WAIT");
 };
 
-const getGrowActionWithBestSunPointPayoff = (game: Game): Action | null => {
+const getGrowActionWithBestSunPointPayoff = (
+  game: Game,
+  staticCellData: StaticCellData
+): Action | null => {
   const { myPlayer } = game;
   const myTrees = myPlayer.getTrees();
   const { sunPoints: mySunPoints } = myPlayer;
@@ -61,6 +71,7 @@ const getGrowActionWithBestSunPointPayoff = (game: Game): Action | null => {
         const sunPointsAfterCollection =
           newGameState.myPlayer.sunPoints +
           calculateSunPointsGainedForDay(
+            staticCellData.sameDirectionDistanceTracker,
             newGameState.cells,
             newGameState.myPlayer,
             newGameState.getAllTrees(),

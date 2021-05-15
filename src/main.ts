@@ -6,8 +6,13 @@ import { getTrashTalk } from "./utils/trashTalker";
 import Action from "./model/Action";
 import Cell from "./model/Cell";
 import Game from "./model/Game";
+import DirectionDistanceTracker from "./model/DirectionDistanceTracker";
+import StaticCellData from "./model/StaticCellData";
 
 const cells: Cell[] = parseInitializationInput();
+const sameDirectionDistanceTracker = new DirectionDistanceTracker(cells);
+const staticCellData = new StaticCellData(sameDirectionDistanceTracker);
+
 let dayTracker = 0;
 let lateGameActionCount = 0;
 
@@ -19,7 +24,7 @@ while (true) {
   }
   let action: Action;
   if (game.day / NUM_DAYS < 0.75) {
-    action = getActionForSunPointSaverStrategy(game);
+    action = getActionForSunPointSaverStrategy(game, staticCellData);
   } else {
     if (lateGameActionCount > 1) {
       action = new Action("WAIT");
