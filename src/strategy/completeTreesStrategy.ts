@@ -139,5 +139,5 @@ const getTreesToConsider = (trees: Tree[]): Tree[] => {
 
 export {
   getActionForCompleteTreesStrategy,
-  getGrowOrCompleteActionForSpookedTrees as getCompleteActionForSpookedTrees,
+  getGrowOrCompleteActionForSpookedTrees,
 };

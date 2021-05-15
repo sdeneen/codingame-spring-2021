@@ -61,7 +61,7 @@ const filterForSpaciousOrNutrientDenseCells = (
       .filter((cellIndx) => game.cells[cellIndx].isOccupied()).length;
     return (
       numNeighbors < 2 ||
-      (seedableCell.richness === HIGH_RICHNESS && numNeighbors < 3)
+      (seedableCell.richness === HIGH_RICHNESS && numNeighbors < 3) // Consider excluding seeds as real neighbors
     );
   });
 };
