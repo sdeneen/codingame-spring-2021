@@ -1,10 +1,12 @@
-import calculateTreeActionCost, {
-  COST_TO_COMPLETE_TREE,
-} from "../cost/ActionCostCalculator";
+import calculateTreeActionCost from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import Game from "../model/Game";
-import { NUM_DIRECTIONS } from "../miscConstants";
-import Tree, { LARGE_TREE_SIZE, MEDIUM_TREE_SIZE } from "../model/Tree";
+import { NUM_DAYS } from "../miscConstants";
+import Tree, {
+  LARGEST_TREE_SIZE,
+  LARGE_TREE_SIZE,
+  MEDIUM_TREE_SIZE,
+} from "../model/Tree";
 import { getTreesThatCastSpookyShadowOnTree } from "../shadowObserver";
 
 /**
@@ -14,26 +16,49 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
   const maxTreesToConsider = 3;
   const { myPlayer, cells } = game;
   const { sunPoints } = myPlayer;
-  const trees = myPlayer.getTrees();
-  trees.sort((tree1, tree2) => {
+  const allMyTrees = myPlayer.getTrees();
+  const daysRemainingIncludingCurDay = NUM_DAYS - game.day;
+  const treesToConsider = allMyTrees.filter(
+    (tree) => daysRemainingIncludingCurDay >= tree.getMinDaysToComplete()
+  );
+
+  treesToConsider.sort((tree1, tree2) => {
     // Prioritize largest size first (closest to completion)
     if (tree2.size !== tree1.size) {
       return tree2.size - tree1.size;
     }
 
     // TODO this could also prioritize based on how many sun points we expect to receive from this tree in future turn(s)
-    // Then prioritize richness
-    const richness1 = cells[tree1.cellIndex].richness;
-    const richness2 = cells[tree2.cellIndex].richness;
-    return richness2 - richness1;
+    const spookedAndCompletable1: boolean =
+      getTreesThatCastSpookyShadowOnTree(cells, game.day + 1, tree1).length >
+        0 && tree1.size === LARGEST_TREE_SIZE;
+    const spookedAndCompletable2: boolean =
+      getTreesThatCastSpookyShadowOnTree(cells, game.day + 1, tree2).length >
+        0 && tree2.size === LARGEST_TREE_SIZE;
+
+    if (spookedAndCompletable1 === spookedAndCompletable2) {
+      // Then prioritize richness
+      const richness1 = cells[tree1.cellIndex].richness;
+      const richness2 = cells[tree2.cellIndex].richness;
+      return richness2 - richness1;
+    }
+
+    return spookedAndCompletable1 ? -1 : 1;
   });
 
-  const numTreesToConsider = Math.min(trees.length, maxTreesToConsider);
+  const numTreesToConsider = Math.min(
+    treesToConsider.length,
+    maxTreesToConsider
+  );
   for (let i = 0; i < numTreesToConsider; i++) {
-    const curTree = trees[i];
+    const curTree = treesToConsider[i];
     const actionForTree = curTree.getNextAction();
     if (actionForTree !== null) {
-      const cost = calculateTreeActionCost(trees, actionForTree.type, curTree);
+      const cost = calculateTreeActionCost(
+        allMyTrees,
+        actionForTree.type,
+        curTree
+      );
       if (sunPoints >= cost) {
         return actionForTree;
       }
@@ -44,13 +69,13 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
 };
 
 /**
- * Strategy that finds trees that are able to be completed (Size 3) and
+ * Strategy that finds trees that are size 2 or 3 and
  * would not garner sun points for the next N days.
  *
  * Note: this is a prediction since the oppo can grow a tree during the next day that causes
  *       future days to be spooked
  */
-const getCompleteActionForSpookedTrees = (game: Game): Action | null => {
+const getGrowOrCompleteActionForSpookedTrees = (game: Game): Action | null => {
   const wastedTrees = getAllWastedTrees(game, 2);
   const affordableWastedTrees = wastedTrees.filter(
     (tree) =>
@@ -112,4 +137,7 @@ const getTreesToConsider = (trees: Tree[]): Tree[] => {
   );
 };
 
-export { getActionForCompleteTreesStrategy, getCompleteActionForSpookedTrees };
+export {
+  getActionForCompleteTreesStrategy,
+  getGrowOrCompleteActionForSpookedTrees as getCompleteActionForSpookedTrees,
+};

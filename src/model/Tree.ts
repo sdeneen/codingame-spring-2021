@@ -47,6 +47,15 @@ export default class Tree {
   };
 
   /**
+   * Includes the current day only if this tree isn't dormant
+   */
+  getMinDaysToComplete = (): number => {
+    const extraTurnIfDormant = this.isDormant ? 1 : 0;
+    // +1 for the COMPLETE action
+    return LARGEST_TREE_SIZE + 1 - this.size + extraTurnIfDormant;
+  };
+
+  /**
    * Return the number of sun points this tree has the capacity to gain during the sun collection phase at the beginning
    * of each day. This doesn't do any checks to see if it is in a shadow right now
    */
