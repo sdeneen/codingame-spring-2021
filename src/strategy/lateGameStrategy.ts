@@ -44,10 +44,19 @@ const getBestTreeToComplete = (
 const getActionForLateGameStrategy = (game: Game): Action | null => {
   const numTurnsRemainingExcludingCurTurn = NUM_DAYS - game.day - 1;
   const { myPlayer, cells } = game;
+
+  const isLastDay = numTurnsRemainingExcludingCurTurn === 0;
+  if (isLastDay) {
+    const treeToComplete = getBestTreeToComplete(cells, myPlayer);
+    if (treeToComplete !== null) {
+      return new Action("COMPLETE", null, treeToComplete.cellIndex);
+    }
+  }
+
   const actionToGetCloserToCompletingSpookedTree =
     getActionToGetCloserToCompletingSpookedTrees(
       game,
-      Math.min(numTurnsRemainingExcludingCurTurn, 2)
+      Math.min(numTurnsRemainingExcludingCurTurn, 1)
     );
   if (actionToGetCloserToCompletingSpookedTree !== null) {
     return actionToGetCloserToCompletingSpookedTree;
@@ -57,14 +66,6 @@ const getActionForLateGameStrategy = (game: Game): Action | null => {
   const growAction = getGrowActionWithBestSunPointPayoff(game, treesToGrow);
   if (growAction !== null) {
     return growAction;
-  }
-
-  const isLastDay = game.day === NUM_DAYS - 1;
-  if (isLastDay) {
-    const treeToComplete = getBestTreeToComplete(cells, myPlayer);
-    if (treeToComplete !== null) {
-      return new Action("COMPLETE", null, treeToComplete.cellIndex);
-    }
   }
 
   return new Action("WAIT");
