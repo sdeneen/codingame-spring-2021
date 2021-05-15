@@ -43,6 +43,7 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
+- (713 Gold -> 325) Max small trees === 1
 - (1135 Gold -> 713 Gold) "L" strategy for seeding to avoid blocking ourselves most of the time
 - (221 Silver - GOLD!!!!) 2 actions per day during end game. seed from size 2+ trees only.
 - (303 Silver -> 221 Silver) Spooked tree checker includes size 2 and size 3 trees. Seed logic is preferred over grow for same tree if seed is in high richness
