@@ -3,55 +3,28 @@ import calculateTreeActionCost, {
 } from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import Game from "../model/Game";
-import { NUM_DIRECTIONS } from "../miscConstants";
-import Tree, { LARGE_TREE_SIZE, MEDIUM_TREE_SIZE } from "../model/Tree";
+import Tree, {
+  MEDIUM_TREE_SIZE,
+  LARGE_TREE_SIZE,
+  LARGEST_TREE_SIZE,
+} from "../model/Tree";
 import { getTreesThatCastSpookyShadowOnTree } from "../shadowObserver";
+import { NUM_DAYS } from "../miscConstants";
+import calculateSunPointsGainedForDay from "../sunPointCalculator";
+import deepCopy from "../utils/deepCopy";
 
 /**
- * Strategy that just tries to complete trees as soon as possible, good for late game.
- */
-const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
-  const maxTreesToConsider = 3;
-  const { myPlayer, cells } = game;
-  const { sunPoints } = myPlayer;
-  const trees = myPlayer.getTrees();
-  trees.sort((tree1, tree2) => {
-    // Prioritize largest size first (closest to completion)
-    if (tree2.size !== tree1.size) {
-      return tree2.size - tree1.size;
-    }
-
-    // TODO this could also prioritize based on how many sun points we expect to receive from this tree in future turn(s)
-    // Then prioritize richness
-    const richness1 = cells[tree1.cellIndex].richness;
-    const richness2 = cells[tree2.cellIndex].richness;
-    return richness2 - richness1;
-  });
-
-  const numTreesToConsider = Math.min(trees.length, maxTreesToConsider);
-  for (let i = 0; i < numTreesToConsider; i++) {
-    const curTree = trees[i];
-    const actionForTree = curTree.getNextAction();
-    if (actionForTree !== null) {
-      const cost = calculateTreeActionCost(trees, actionForTree.type, curTree);
-      if (sunPoints >= cost) {
-        return actionForTree;
-      }
-    }
-  }
-
-  return new Action("WAIT");
-};
-
-/**
- * Strategy that finds trees that are able to be completed (Size 3) and
- * would not garner sun points for the next N days.
+ * Strategy that finds trees that would not garner sun points for the next N days, and that are somewhat close to
+ * being able to be completed (medium size and up)
  *
  * Note: this is a prediction since the oppo can grow a tree during the next day that causes
  *       future days to be spooked
  */
-const getCompleteActionForSpookedTrees = (game: Game): Action | null => {
-  const wastedTrees = getAllWastedTrees(game, 2);
+const getActionToGetCloserToCompletingSpookedTrees = (
+  game: Game,
+  numSpookyTurnsRequired: number
+): Action | null => {
+  const wastedTrees = getAllWastedTrees(game, numSpookyTurnsRequired);
   const affordableWastedTrees = wastedTrees.filter(
     (tree) =>
       calculateTreeActionCost(
@@ -112,4 +85,100 @@ const getTreesToConsider = (trees: Tree[]): Tree[] => {
   );
 };
 
-export { getActionForCompleteTreesStrategy, getCompleteActionForSpookedTrees };
+const getCompletableTrees = (trees: Tree[]): Tree[] => {
+  return trees.filter(
+    (tree) => tree.size === LARGE_TREE_SIZE && !tree.isDormant
+  );
+};
+
+/**
+ * Makes the assumption that other trees won't change in future turns, which is straight up incorrect but this
+ * should provide an estimate at least. We can improve as needed later
+ */
+const estimateCostToGrowAndCompleteTree = (
+  cellIndexToTree: Record<number, Tree>,
+  tree: Tree
+) => {
+  let curTreeState = tree.getDeepCopy();
+  let cellIndexToTreeState = deepCopy(cellIndexToTree);
+  let sunPointCost = 0;
+  while (curTreeState.size < LARGEST_TREE_SIZE) {
+    sunPointCost += calculateTreeActionCost(
+      Object.values(cellIndexToTreeState),
+      "GROW",
+      curTreeState
+    );
+    curTreeState = curTreeState.getModifiedDeepCopy({
+      size: curTreeState.size + 1,
+    });
+    cellIndexToTreeState[curTreeState.cellIndex] = curTreeState;
+  }
+
+  return sunPointCost + COST_TO_COMPLETE_TREE;
+};
+
+/**
+ * This method makes some assumptions about future turns that won't be accurate but hopefully are close enough
+ * to perform well. See the comments in this method and on `estimateCostToGrowAndCompleteTree`
+ *
+ * It takes into account sun point (estimated) and number of days requirements for tree completion.
+ */
+const estimateWhichTreesWeCanCompleteByEndOfGame = (game: Game): Tree[] => {
+  const { cells, day, myPlayer } = game;
+  const numDaysRemainingExcludingCurDay = NUM_DAYS - day - 1;
+  const numDaysRemainingIncludingCurDay = numDaysRemainingExcludingCurDay + 1;
+  const allTrees = game.getAllTrees();
+  // Assume we'll gain on average the same number of sun points per day remaining as we did today
+  // This could be optimized further
+  const sunPointsGainedToday = calculateSunPointsGainedForDay(
+    cells,
+    myPlayer,
+    allTrees,
+    day
+  );
+  const sunPointsGainedInRemainingDays =
+    numDaysRemainingExcludingCurDay * sunPointsGainedToday;
+  const totalSunPoints = myPlayer.sunPoints + sunPointsGainedInRemainingDays;
+
+  // Make sure to only look at trees that can be completed in the number of days remaining in the game
+  const myEligibleTrees = myPlayer
+    .getTrees()
+    .filter(
+      (tree) => numDaysRemainingIncludingCurDay >= tree.getMinDaysToComplete()
+    );
+
+  // Prioritize easiest/closest completion (quantity) first, then richness (quality)
+  myEligibleTrees.sort((tree1, tree2) => {
+    if (tree2.size !== tree1.size) {
+      return tree2.size - tree1.size;
+    }
+
+    const richness1 = cells[tree1.cellIndex].richness;
+    const richness2 = cells[tree2.cellIndex].richness;
+    return richness2 - richness1;
+  });
+
+  // Find the ones we can realistically complete given how many sun points we estimate that we will have to work with
+  const treesToComplete = [];
+  let sunPointsLeftToSpend = totalSunPoints;
+  for (let i = 0; i < myEligibleTrees.length; i++) {
+    const tree = myEligibleTrees[i];
+    const sunPointsToComplete = estimateCostToGrowAndCompleteTree(
+      myPlayer.cellIndexToTree,
+      tree
+    );
+    if (sunPointsToComplete > sunPointsLeftToSpend) {
+      break;
+    }
+    sunPointsLeftToSpend -= sunPointsToComplete;
+    treesToComplete.push(tree);
+  }
+
+  return treesToComplete;
+};
+
+export {
+  getActionToGetCloserToCompletingSpookedTrees,
+  getCompletableTrees,
+  estimateWhichTreesWeCanCompleteByEndOfGame,
+};

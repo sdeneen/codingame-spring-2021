@@ -1,3 +1,4 @@
+import { NUM_DAYS } from "../miscConstants";
 import Game from "../model/Game";
 import calculateTreeActionCost from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
@@ -5,11 +6,14 @@ import Tree from "../model/Tree";
 import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
 import { getHighestRichnessFreeSeedAction } from "./seedingStrategy";
-import { getCompleteActionForSpookedTrees } from "./completeTreesStrategy";
+import { getActionToGetCloserToCompletingSpookedTrees } from "./completeTreesStrategy";
 import { HIGH_RICHNESS } from "../model/Cell";
 
 const getActionForSunPointSaverStrategy = (game: Game): Action => {
-  const bestCompleteAction = getCompleteActionForSpookedTrees(game);
+  const bestCompleteAction = getActionToGetCloserToCompletingSpookedTrees(
+    game,
+    2
+  );
   if (bestCompleteAction !== null) {
     console.error("===== Completing early!");
     return bestCompleteAction;
@@ -38,16 +42,27 @@ const getActionForSunPointSaverStrategy = (game: Game): Action => {
   return new Action("WAIT");
 };
 
-const getGrowActionWithBestSunPointPayoff = (game: Game): Action | null => {
+/**
+ * @param game - the game state
+ * @param treeFilter - optional filter to limit which trees to consider growing, defaulting to no filter (looking at all trees)
+ */
+const getGrowActionWithBestSunPointPayoff = (
+  game: Game,
+  treeFilter: Tree[] = null
+): Action | null => {
+  const daysRemainingIncludingCurDay = NUM_DAYS - game.day;
   const { myPlayer } = game;
   const myTrees = myPlayer.getTrees();
   const { sunPoints: mySunPoints } = myPlayer;
   let bestTree: Tree = null;
   let mostResultingSunPoints: Number = -1;
 
-  myTrees.forEach((tree) => {
+  const treesToConsider = treeFilter != null ? treeFilter : myTrees;
+  treesToConsider.forEach((tree) => {
     const nextAction = tree.getNextAction();
-    if (nextAction?.type === "GROW") {
+    const canCompleteByEndOfGame =
+      daysRemainingIncludingCurDay >= tree.getMinDaysToComplete();
+    if (nextAction?.type === "GROW" && canCompleteByEndOfGame) {
       const growthCost = calculateTreeActionCost(
         myTrees,
         nextAction.type,
@@ -79,3 +94,4 @@ const getGrowActionWithBestSunPointPayoff = (game: Game): Action | null => {
 };
 
 export default getActionForSunPointSaverStrategy;
+export { getGrowActionWithBestSunPointPayoff };

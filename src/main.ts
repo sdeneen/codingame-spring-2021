@@ -1,7 +1,7 @@
 import { parseInitializationInput, parseTurnInput } from "./inputParser";
 import getActionForSunPointSaverStrategy from "./strategy/sunPointSaverStrategy";
-import { getActionForCompleteTreesStrategy } from "./strategy/completeTreesStrategy";
-import { NUM_TURNS } from "./miscConstants";
+import getActionForLateGameStrategy from "./strategy/lateGameStrategy";
+import { NUM_DAYS, MIN_NUM_DAYS_IN_TREE_LIFECYCLE } from "./miscConstants";
 import { getTrashTalk } from "./utils/trashTalker";
 import Action from "./model/Action";
 import Cell from "./model/Cell";
@@ -12,10 +12,10 @@ const cells: Cell[] = parseInitializationInput();
 while (true) {
   const game: Game = parseTurnInput(cells);
   let action: Action;
-  if (game.day / NUM_TURNS < 0.75) {
+  if (game.day < NUM_DAYS - MIN_NUM_DAYS_IN_TREE_LIFECYCLE) {
     action = getActionForSunPointSaverStrategy(game);
   } else {
-    action = getActionForCompleteTreesStrategy(game);
+    action = getActionForLateGameStrategy(game);
   }
 
   console.log(`${action} ${getTrashTalk()}`);

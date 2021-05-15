@@ -10,13 +10,12 @@ const getHighestRichnessFreeSeedAction = (game: Game): Action | null => {
     return null;
   }
   // todo (mv): if multiple, pick furtherest away
-  let mostRichSeedableCell = freeSeedActions.reduce((prev, cur) =>
+  return freeSeedActions.reduce((prev, cur) =>
     game.cells[prev.targetCellIdx].richness >
     game.cells[cur.targetCellIdx].richness
       ? prev
       : cur
   );
-  return mostRichSeedableCell;
 };
 
 const getFreeSeedActions = (game: Game): Action[] => {

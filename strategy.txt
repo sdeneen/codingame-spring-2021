@@ -18,16 +18,15 @@ Add a phase 1.5 in here that prioritizes growing in richer areas
 2. Point scoring phase (completing trees ftw)
  - This is pretty much the same as the strategy that got us out of Wood league, except prioritize largest trees first since they're closest to completion
  - Optimizations:
-	- update getActionForCompleteTreesStrategy to calculate how many sun points it needs fully complete all trees. Then wait until the last possible turn complete everything so we can continue to collect sun points.
-    - consider switching to complete phase based on board rather than % of game complete. E.g. N spaces are taken and it'd be better to start collection.
-	- consider prioritizing completing trees that will be blocked the next turn
-    - think about how to save sun points for future days, right now the algo goes wide across many trees but we may want to go deep
+	- consider switching to complete phase based on board rather than % of game complete. E.g. N spaces are taken and it'd be better to start collection.
+	- think about how to save sun points for future days, right now the algo goes wide across many trees but we may want to go deep
 
 Tips:
 - don't forget to check for richness = 0, which are cells that aren't usable
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
+- (242 Silver -> ??? Silver) TODO add this
 - (303 Silver -> 221 Silver) Spooked tree checker includes size 2 and size 3 trees. Seed logic is preferred over grow for same tree if seed is in high richness
 - (253 Silver -> 303 Silver) Seed high richness cells 
 - (502 Silver -> 253 Silver) Complete size 3 trees early if there'd be too many wasted days
