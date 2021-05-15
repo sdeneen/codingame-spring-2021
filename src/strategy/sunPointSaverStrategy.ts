@@ -4,7 +4,7 @@ import Action from "../model/Action";
 import Tree from "../model/Tree";
 import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
-import { getHighestRichnessFreeSeedAction } from "./seedingStrategy";
+import { getBestSeedAction } from "./seedingStrategy";
 import { getGrowOrCompleteActionForSpookedTrees } from "./completeTreesStrategy";
 import { HIGH_RICHNESS } from "../model/Cell";
 import StaticCellData from "../model/StaticCellData";
@@ -18,7 +18,7 @@ const getActionForSunPointSaverStrategy = (
     console.error("===== Trying to grow/complete spooked trees early!");
     return bestGrowOrCompleteAction;
   }
-  const freeSeedAction = getHighestRichnessFreeSeedAction(game);
+  const freeSeedAction = getBestSeedAction(staticCellData, game);
   const bestGrowAction = getGrowActionWithBestSunPointPayoff(
     game,
     staticCellData
@@ -71,7 +71,7 @@ const getGrowActionWithBestSunPointPayoff = (
         const sunPointsAfterCollection =
           newGameState.myPlayer.sunPoints +
           calculateSunPointsGainedForDay(
-            staticCellData.sameDirectionDistanceTracker,
+            staticCellData.directionDistanceTracker,
             newGameState.cells,
             newGameState.myPlayer,
             newGameState.getAllTrees(),

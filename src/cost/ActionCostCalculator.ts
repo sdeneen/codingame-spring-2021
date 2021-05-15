@@ -33,11 +33,14 @@ const calculateTreeActionCost = (
           );
       }
     case "SEED":
-      return getTreesWithSize(ownedTrees, SEED_TREE_SIZE);
+      return calculateSeedCost(ownedTrees);
     default:
       return 0;
   }
 };
 
+const calculateSeedCost = (ownedTrees: Tree[]) =>
+  getTreesWithSize(ownedTrees, SEED_TREE_SIZE);
+
 export default calculateTreeActionCost;
-export { COST_TO_COMPLETE_TREE };
+export { calculateSeedCost, COST_TO_COMPLETE_TREE };
