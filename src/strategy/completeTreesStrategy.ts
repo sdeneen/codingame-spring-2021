@@ -4,7 +4,7 @@ import calculateTreeActionCost, {
 import Action from "../model/Action";
 import Game from "../model/Game";
 import { NUM_DIRECTIONS } from "../miscConstants";
-import Tree, { LARGE_TREE_SIZE } from "../model/Tree";
+import Tree, { LARGE_TREE_SIZE, MEDIUM_TREE_SIZE } from "../model/Tree";
 import { getTreesThatCastSpookyShadowOnTree } from "../shadowObserver";
 
 /**
@@ -55,21 +55,25 @@ const getCompleteActionForSpookedTrees = (game: Game): Action | null => {
     const wastedTrees = getAllWastedTrees(game, 2);
 
     if (wastedTrees.length !== 0) {
-      // todo optimize: if there are multiple, pick best option (richness?, most wasted days?, least oppo blocking?)
-      return wastedTrees[0].getNextAction();
+      return wastedTrees
+        .reduce((t1, t2) =>
+          game.cells[t1.cellIndex].richness > game.cells[t2.cellIndex].richness
+            ? t1
+            : t2
+        )
+        .getNextAction();
     }
   }
+
   return null;
 };
 
 const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
-  const myCompletableTrees: Tree[] = getCompletableTrees(
-    game.myPlayer.getTrees()
-  );
+  const treesToConsider: Tree[] = getTreesToConsider(game.myPlayer.getTrees());
   let wastedTrees: Tree[] = [];
 
-  for (let index = 0; index < myCompletableTrees.length; index++) {
-    const tree: Tree = myCompletableTrees[index];
+  for (let index = 0; index < treesToConsider.length; index++) {
+    const tree: Tree = treesToConsider[index];
     let areAllDaysWasted: boolean = true;
 
     for (let i = 1; i <= wastedDays; i++) {
@@ -94,9 +98,11 @@ const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
   return wastedTrees;
 };
 
-const getCompletableTrees = (trees: Tree[]): Tree[] => {
+const getTreesToConsider = (trees: Tree[]): Tree[] => {
   return trees.filter(
-    (tree) => tree.size === LARGE_TREE_SIZE && !tree.isDormant
+    (tree) =>
+      (tree.size === LARGE_TREE_SIZE || tree.size === MEDIUM_TREE_SIZE) &&
+      !tree.isDormant
   );
 };
 

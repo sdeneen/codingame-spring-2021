@@ -28,6 +28,7 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
+- (303 Silver -> 221 Silver) Spooked tree checker includes size 2 and size 3 trees. Seed logic is preferred over grow for same tree if seed is in high richness
 - (253 Silver -> 303 Silver) Seed high richness cells 
 - (502 Silver -> 253 Silver) Complete size 3 trees early if there'd be too many wasted days
 - (716 Silver -> 502 Silver) Don't seed if there are two or more occupied adjacent cells

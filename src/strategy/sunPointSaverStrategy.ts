@@ -6,6 +6,7 @@ import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
 import { getHighestRichnessFreeSeedAction } from "./seedingStrategy";
 import { getCompleteActionForSpookedTrees } from "./completeTreesStrategy";
+import { HIGH_RICHNESS } from "../model/Cell";
 
 const getActionForSunPointSaverStrategy = (game: Game): Action => {
   const bestCompleteAction = getCompleteActionForSpookedTrees(game);
@@ -13,14 +14,25 @@ const getActionForSunPointSaverStrategy = (game: Game): Action => {
     console.error("===== Completing early!");
     return bestCompleteAction;
   }
-
+  const freeSeedAction = getHighestRichnessFreeSeedAction(game);
   const bestGrowAction = getGrowActionWithBestSunPointPayoff(game);
-  if (bestGrowAction !== null) {
+
+  if (
+    freeSeedAction !== null &&
+    bestGrowAction !== null &&
+    freeSeedAction?.sourceCellIdx === bestGrowAction?.sourceCellIdx
+  ) {
+    if (game.cells[freeSeedAction.targetCellIdx].richness === HIGH_RICHNESS) {
+      return freeSeedAction;
+    }
     return bestGrowAction;
   }
-  const freeSeedAction = getHighestRichnessFreeSeedAction(game);
+
   if (freeSeedAction !== null) {
     return freeSeedAction;
+  }
+  if (bestGrowAction !== null) {
+    return bestGrowAction;
   }
 
   return new Action("WAIT");
@@ -46,7 +58,6 @@ const getGrowActionWithBestSunPointPayoff = (game: Game): Action | null => {
           game,
           nextAction.targetCellIdx
         );
-        newGameState.opponentPlayer.sunPoints = -5;
         const sunPointsAfterCollection =
           newGameState.myPlayer.sunPoints +
           calculateSunPointsGainedForDay(
