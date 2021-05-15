@@ -76,7 +76,7 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
  *       future days to be spooked
  */
 const getGrowOrCompleteActionForSpookedTrees = (game: Game): Action | null => {
-  const wastedTrees = getAllWastedTrees(game, 2);
+  const wastedTrees = getAllWastedTrees(game);
   const affordableWastedTrees = wastedTrees.filter(
     (tree) =>
       calculateTreeActionCost(
@@ -99,13 +99,20 @@ const getGrowOrCompleteActionForSpookedTrees = (game: Game): Action | null => {
   return null;
 };
 
-const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
+const getAllWastedTrees = (game: Game): Tree[] => {
+  const tooManyLargeTrees: boolean =
+    game.myPlayer.getTrees().filter((tree) => tree.size === LARGEST_TREE_SIZE)
+      .length >= 3;
   const treesToConsider: Tree[] = getTreesToConsider(game.myPlayer.getTrees());
   let wastedTrees: Tree[] = [];
 
   for (let index = 0; index < treesToConsider.length; index++) {
     const tree: Tree = treesToConsider[index];
     let areAllDaysWasted: boolean = true;
+    let wastedDays: number = 2;
+    if (tree.size === LARGEST_TREE_SIZE && tooManyLargeTrees) {
+      wastedDays = 1;
+    }
 
     for (let i = 1; i <= wastedDays; i++) {
       const treesCastingSpookyShadows = getTreesThatCastSpookyShadowOnTree(
