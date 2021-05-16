@@ -43,6 +43,8 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
+- (258 Gold -> ???) Update tree size limit to (2 small, 3 medium, 3 large). Add a fallback seeding algo that seeds distance 3 away (in a straight line) if the L strat has no viable seeding locations. In early game, don't allow GROW action that have zero or negative sun point payoff
+- (230 Gold -> 259 Gold) Define a limit per size of tree (1 small, 2 medium, 4 large). Try to complete once we've reached all tree size limits, enforcing earlier completion.
 - (306 Gold -> 202 Gold) Update seeding algo to check for potential blockages since the "L" strategy doesn't fully stop us from blocking ourselves
 - (713 Gold -> 325 Gold) Max small trees === 1
 - (1135 Gold -> 713 Gold) "L" strategy for seeding to avoid blocking ourselves most of the time

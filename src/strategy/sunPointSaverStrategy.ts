@@ -1,27 +1,53 @@
 import Game from "../model/Game";
 import calculateTreeActionCost from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
-import Tree, { SEED_TREE_SIZE, SMALL_TREE_SIZE } from "../model/Tree";
+import Tree, {
+  SMALL_TREE_SIZE,
+  MEDIUM_TREE_SIZE,
+  LARGE_TREE_SIZE,
+  LARGEST_TREE_SIZE,
+} from "../model/Tree";
 import determineGameStateAfterGrowAction from "../gameStateManager";
 import calculateSunPointsGainedForDay from "../sunPointCalculator";
 import { getBestSeedAction } from "./seedingStrategy";
-import { getGrowOrCompleteActionForSpookedTrees } from "./completeTreesStrategy";
+import {
+  getGrowOrCompleteActionForSpookedTrees,
+  getActionForCompleteTreesStrategy,
+} from "./completeTreesStrategy";
 import { HIGH_RICHNESS } from "../model/Cell";
 import StaticCellData from "../model/StaticCellData";
+
+const TREE_SIZE_TO_MAX_ALLOWED = {
+  [SMALL_TREE_SIZE]: 2,
+  [MEDIUM_TREE_SIZE]: 3,
+  [LARGE_TREE_SIZE]: 3,
+};
 
 const getActionForSunPointSaverStrategy = (
   game: Game,
   staticCellData: StaticCellData
 ): Action => {
+  const { myPlayer } = game;
+  const myTrees = myPlayer.getTrees();
   const bestGrowOrCompleteAction = getGrowOrCompleteActionForSpookedTrees(game);
   if (bestGrowOrCompleteAction !== null) {
     console.error("===== Trying to grow/complete spooked trees early!");
     return bestGrowOrCompleteAction;
   }
   const freeSeedAction = getBestSeedAction(staticCellData, game);
+  const isGrowAllowedPerSizeToGrowTo = {};
+
+  Object.keys(TREE_SIZE_TO_MAX_ALLOWED).forEach((size) => {
+    const maxAllowedTreesOfSize = TREE_SIZE_TO_MAX_ALLOWED[size];
+    isGrowAllowedPerSizeToGrowTo[size] =
+      myTrees.filter((tree) => tree.size === parseInt(size, 10)).length <
+      maxAllowedTreesOfSize;
+  });
+
   const bestGrowAction = getGrowActionWithBestSunPointPayoff(
     game,
-    staticCellData
+    staticCellData,
+    isGrowAllowedPerSizeToGrowTo
   );
 
   if (
@@ -42,25 +68,61 @@ const getActionForSunPointSaverStrategy = (
     return bestGrowAction;
   }
 
+  // If we can't grow because we've hit our tree limit, try to complete to open up more tree growing
+  if (
+    Object.values(isGrowAllowedPerSizeToGrowTo).every((allowed) => !allowed)
+  ) {
+    const completeAction = getActionForCompleteTreesStrategy(game);
+    if (completeAction !== null) {
+      return completeAction;
+    }
+  }
+
+  // // If we can't grow to large because we've hit our tree limit, try to complete to open up more tree growing
+  // if (!isGrowAllowedPerSizeToGrowTo[LARGEST_TREE_SIZE]) {
+  //   const completeAction = getActionForCompleteTreesStrategy(game);
+  //   if (completeAction !== null) {
+  //     return completeAction;
+  //   }
+  // }
+
   return new Action("WAIT");
 };
 
 const getGrowActionWithBestSunPointPayoff = (
   game: Game,
-  staticCellData: StaticCellData
+  staticCellData: StaticCellData,
+  isGrowAllowedPerSizeToGrowTo: Record<number, boolean>
 ): Action | null => {
-  const { myPlayer } = game;
+  const { cells, myPlayer, day } = game;
   const myTrees = myPlayer.getTrees();
-  const tooManySmallTrees: boolean =
-    myTrees.filter((tree) => tree.size === SMALL_TREE_SIZE).length >= 1;
+
   const { sunPoints: mySunPoints } = myPlayer;
   let bestTree: Tree = null;
-  let mostResultingSunPoints: Number = -1;
+  let bestTreeRichness: number = -1;
+  let mostResultingSunPoints: number = -1;
+
+  const sunPointsAfterCollectionNextTurnIfWeDidNotGrow =
+    myPlayer.sunPoints +
+    calculateSunPointsGainedForDay(
+      staticCellData.directionDistanceTracker,
+      cells,
+      myPlayer,
+      game.getAllTrees(),
+      day + 1
+    );
 
   myTrees.forEach((tree) => {
-    if (tooManySmallTrees && tree.size === SEED_TREE_SIZE) {
+    const cellForTree = cells[tree.cellIndex];
+    // Can't grow largest trees any more
+    if (tree.size === LARGEST_TREE_SIZE) {
       return;
     }
+
+    if (!isGrowAllowedPerSizeToGrowTo[tree.size + 1]) {
+      return;
+    }
+
     const nextAction = tree.getNextAction();
     if (nextAction?.type === "GROW") {
       const growthCost = calculateTreeActionCost(
@@ -82,9 +144,23 @@ const getGrowActionWithBestSunPointPayoff = (
             newGameState.getAllTrees(),
             newGameState.day + 1
           );
-        // TODO better tie breaking than just going with the first one
-        if (mostResultingSunPoints < sunPointsAfterCollection) {
+
+        // Excluding late-game, if this grow doesn't help us gain sun points at all next turn, don't allow it
+        if (
+          day < 12 &&
+          sunPointsAfterCollection <=
+            sunPointsAfterCollectionNextTurnIfWeDidNotGrow - growthCost
+        ) {
+          return;
+        }
+
+        if (
+          mostResultingSunPoints < sunPointsAfterCollection ||
+          (mostResultingSunPoints === sunPointsAfterCollection &&
+            bestTreeRichness < cellForTree.richness)
+        ) {
           mostResultingSunPoints = sunPointsAfterCollection;
+          bestTreeRichness = cellForTree.richness;
           bestTree = tree;
         }
       }

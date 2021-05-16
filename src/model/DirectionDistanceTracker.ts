@@ -70,6 +70,26 @@ export default class DirectionDistanceTracker {
   }
 
   /**
+   * Returns cell indices that are the given {distance} away from the cell at {fromCellIndex},
+   * in any direction.
+   */
+  getCellIndiciesAtDistanceInAnyDirection = (
+    fromCellIndex: number,
+    distance: ShadowDistance
+  ): number[] => {
+    const cellIndicesAtDistance = [];
+    this.cellIndexToCellsAtDistancePerDirection[fromCellIndex].forEach(
+      (cellsAtDistance) => {
+        if (cellsAtDistance[distance - 1] >= 0) {
+          cellIndicesAtDistance.push(cellsAtDistance[distance - 1]);
+        }
+      }
+    );
+
+    return cellIndicesAtDistance;
+  };
+
+  /**
    * Returns cell indices that are in the given {direction} from the cell at {fromCellIndex},
    * but only up to {maxDistance} cells away.
    */

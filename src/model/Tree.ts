@@ -1,10 +1,18 @@
 import Action from "./Action";
+import { coalesce } from "../utils/nullUtils";
 
 export const SEED_TREE_SIZE = 0;
 export const SMALL_TREE_SIZE = 1;
 export const MEDIUM_TREE_SIZE = 2;
 export const LARGE_TREE_SIZE = 3;
 export const LARGEST_TREE_SIZE = 3;
+
+interface TreeFields {
+  cellIndex: number;
+  size: number;
+  isMine: boolean;
+  isDormant: boolean;
+}
 
 export default class Tree {
   cellIndex: number;
@@ -60,6 +68,22 @@ export default class Tree {
    * of each day. This doesn't do any checks to see if it is in a shadow right now
    */
   getSunPointGainPerDay = (): number => this.size;
+
+  /**
+   * Get a deep copy of this object, replacing any provided fields
+   */
+  getModifiedDeepCopy = ({
+    cellIndex,
+    size,
+    isMine,
+    isDormant,
+  }: Partial<TreeFields>): Tree =>
+    new Tree(
+      coalesce(cellIndex, this.cellIndex),
+      coalesce(size, this.size),
+      coalesce(isMine, this.isMine),
+      coalesce(isDormant, this.isDormant)
+    );
 
   toString = () => JSON.stringify(this);
 
