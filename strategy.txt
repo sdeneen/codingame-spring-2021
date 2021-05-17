@@ -43,6 +43,8 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
+- (???? Gold -> ????) Optimizes GROW actions for sun point differential with opponent rather than just our gain, Adds logic to COMPLETE trees early if we think they will stop some of our other trees from gaining sun points over the next two days
+- (???? Gold) No change, just resetting control since it's been a decent amount of time since it last ran
 - (306 Gold -> 202 Gold) Update seeding algo to check for potential blockages since the "L" strategy doesn't fully stop us from blocking ourselves
 - (713 Gold -> 325 Gold) Max small trees === 1
 - (1135 Gold -> 713 Gold) "L" strategy for seeding to avoid blocking ourselves most of the time
