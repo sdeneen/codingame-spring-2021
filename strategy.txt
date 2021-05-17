@@ -43,7 +43,7 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
-- (see prev -> 92 Legend!!!!!!!!!!!) Fixes bugs in scoring conversion logic. Updates conversion function that converts from score to sun points to have different conversion rates
+- (see prev -> 92 Legend!!!!!!!!!!!) Fixes bugs in scoring conversion logic. Updates conversion function that converts from score to sun points to have different conversion rates. Uses new algo for whole game (stops using our previous late game strategy)
 - (21 Gold -> ~29ish Gold at 60% progress in arena but we're running out of time so I'm killing this to send in the latest update before time runs out) Removes logic to do spooky avoidance completion, actions that give a decent sun point gain take priority over seeding, takes into account score when determining the best action in phase 1
 - (78 Gold -> 19 Gold) Considers GROW and COMPLETE actions together in the sunPointSaver strategy, stops considering GROW actions on MEDIUM size trees for spooky avoidance, maxes out LARGE trees at 5
 - (195 Gold -> 102 Gold) Avoid completion actions that will spend sun points that are worth more final score than the actual points gained for the COMPLETE, Add a fallback seeding algo that seeds distance 3 away (in a straight line) if the L strat has no viable seeding locations
