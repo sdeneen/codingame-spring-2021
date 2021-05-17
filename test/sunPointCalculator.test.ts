@@ -52,4 +52,20 @@ test("it calculates sun points for some trees", () => {
     0
   );
   expect(sunPointsGained).toEqual(6);
+
+  const opponentPlayer = new Player(
+    0,
+    0,
+    allTrees.filter((t) => !t.isMine),
+    false
+  );
+  const opponentSunPointsGained = calculateSunPointsGainedForDay(
+    tracker,
+    cellsData,
+    opponentPlayer,
+    allTrees,
+    0
+  );
+
+  expect(opponentSunPointsGained).toEqual(3);
 });

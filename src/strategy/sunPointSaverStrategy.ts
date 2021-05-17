@@ -13,23 +13,42 @@ import { getBestSeedAction } from "./seedingStrategy";
 import {
   getGrowOrCompleteActionForSpookedTrees,
   getActionForCompleteTreesStrategy,
+  getCompleteActionForTreeThatBlocksOurOtherTrees,
 } from "./completeTreesStrategy";
 import { HIGH_RICHNESS } from "../model/Cell";
 import StaticCellData from "../model/StaticCellData";
 
+// EARLY_GAME_SIZE_TO_MAX_ALLOWED = {
+//   [SMALL_TREE_SIZE]: 1,
+//   [MEDIUM_TREE_SIZE]: 2,
+//   [LARGE_TREE_SIZE]: 4,
+// };
+
 const TREE_SIZE_TO_MAX_ALLOWED = {
-  [SMALL_TREE_SIZE]: 2,
-  [MEDIUM_TREE_SIZE]: 3,
-  [LARGE_TREE_SIZE]: 3,
+  [SMALL_TREE_SIZE]: 1,
+  [MEDIUM_TREE_SIZE]: 2,
+  [LARGE_TREE_SIZE]: 4,
 };
 
 const getActionForSunPointSaverStrategy = (
   game: Game,
   staticCellData: StaticCellData
 ): Action => {
-  const { myPlayer } = game;
+  const { myPlayer, day } = game;
   const myTrees = myPlayer.getTrees();
-  const bestGrowOrCompleteAction = getGrowOrCompleteActionForSpookedTrees(game);
+  const allowCompletes = day >= 11;
+  // Looks to see if any of our size 3 trees will block our other trees and tries to complete them
+  // TODO improvement: if we're able to GROW the other tree out of the blockage instead, then don't bother COMPLETEing and let the grow action part of the algo handle it
+  const completeActionToUnblock = allowCompletes
+    ? getCompleteActionForTreeThatBlocksOurOtherTrees(game)
+    : null;
+  if (completeActionToUnblock !== null) {
+    console.error("===== Completing a tree to unblock our other tree(s)");
+    return completeActionToUnblock;
+  }
+  const bestGrowOrCompleteAction = allowCompletes
+    ? getGrowOrCompleteActionForSpookedTrees(game)
+    : null;
   if (bestGrowOrCompleteAction !== null) {
     console.error("===== Trying to grow/complete spooked trees early!");
     return bestGrowOrCompleteAction;
@@ -40,8 +59,9 @@ const getActionForSunPointSaverStrategy = (
   Object.keys(TREE_SIZE_TO_MAX_ALLOWED).forEach((size) => {
     const maxAllowedTreesOfSize = TREE_SIZE_TO_MAX_ALLOWED[size];
     isGrowAllowedPerSizeToGrowTo[size] =
+      !allowCompletes ||
       myTrees.filter((tree) => tree.size === parseInt(size, 10)).length <
-      maxAllowedTreesOfSize;
+        maxAllowedTreesOfSize;
   });
 
   const bestGrowAction = getGrowActionWithBestSunPointPayoff(
@@ -70,6 +90,7 @@ const getActionForSunPointSaverStrategy = (
 
   // If we can't grow because we've hit our tree limit, try to complete to open up more tree growing
   if (
+    allowCompletes &&
     Object.values(isGrowAllowedPerSizeToGrowTo).every((allowed) => !allowed)
   ) {
     const completeAction = getActionForCompleteTreesStrategy(game);
@@ -100,17 +121,7 @@ const getGrowActionWithBestSunPointPayoff = (
   const { sunPoints: mySunPoints } = myPlayer;
   let bestTree: Tree = null;
   let bestTreeRichness: number = -1;
-  let mostResultingSunPoints: number = -1;
-
-  const sunPointsAfterCollectionNextTurnIfWeDidNotGrow =
-    myPlayer.sunPoints +
-    calculateSunPointsGainedForDay(
-      staticCellData.directionDistanceTracker,
-      cells,
-      myPlayer,
-      game.getAllTrees(),
-      day + 1
-    );
+  let bestResultingSunPointsDifferential: number = -1000000;
 
   myTrees.forEach((tree) => {
     const cellForTree = cells[tree.cellIndex];
@@ -135,7 +146,7 @@ const getGrowActionWithBestSunPointPayoff = (
           game,
           nextAction.targetCellIdx
         );
-        const sunPointsAfterCollection =
+        const ourSunPointsAfterCollection =
           newGameState.myPlayer.sunPoints +
           calculateSunPointsGainedForDay(
             staticCellData.directionDistanceTracker,
@@ -145,21 +156,24 @@ const getGrowActionWithBestSunPointPayoff = (
             newGameState.day + 1
           );
 
-        // Excluding late-game, if this grow doesn't help us gain sun points at all next turn, don't allow it
-        if (
-          day < 12 &&
-          sunPointsAfterCollection <=
-            sunPointsAfterCollectionNextTurnIfWeDidNotGrow - growthCost
-        ) {
-          return;
-        }
+        const opponentSunPointsAfterCollection =
+          newGameState.opponentPlayer.sunPoints +
+          calculateSunPointsGainedForDay(
+            staticCellData.directionDistanceTracker,
+            newGameState.cells,
+            newGameState.opponentPlayer,
+            newGameState.getAllTrees(),
+            newGameState.day + 1
+          );
 
+        const sunPointDifferential =
+          ourSunPointsAfterCollection - opponentSunPointsAfterCollection;
         if (
-          mostResultingSunPoints < sunPointsAfterCollection ||
-          (mostResultingSunPoints === sunPointsAfterCollection &&
+          bestResultingSunPointsDifferential < sunPointDifferential ||
+          (bestResultingSunPointsDifferential === sunPointDifferential &&
             bestTreeRichness < cellForTree.richness)
         ) {
-          mostResultingSunPoints = sunPointsAfterCollection;
+          bestResultingSunPointsDifferential = sunPointDifferential;
           bestTreeRichness = cellForTree.richness;
           bestTree = tree;
         }

@@ -9,9 +9,9 @@ data driven algorithm to complete in a good way
 
 
 Concrete ideas:
-1. Complete Earlier: Max out each size tree at a different limit (i.e. 1 size 1, 2 size 2's, 3 size 3's). If we are at all our limits, COMPLETE (can write a state manager func to see which COMPLETE leaves us with the most sun points in the next N turns)
-2. Complete Earlier: During phase 1 and/or 2, if one of our large trees is gonna block another one of our trees, COMPLETE it (maybe limit to high richness)
-
+1. Optimize for sun point DIFFERENCE between us and oppo, not just our sun point gain
+2. Basic end game completion strategy update: do whichever COMPLETE action gets us the most sun points next turn (maybe even tries to extrapolate to two turns)
+	- could reference that same strategy in our early game completion logic as well
 
 ==== Old =====
 
@@ -43,7 +43,9 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
-- (258 Gold -> ???) Update tree size limit to (2 small, 3 medium, 3 large). Add a fallback seeding algo that seeds distance 3 away (in a straight line) if the L strat has no viable seeding locations. In early game, don't allow GROW action that have zero or negative sun point payoff
+- (444 Gold -> 343 Gold) Fixes dormant checks, updates COMPLETION logic from previous change to look two days ahead, stops growing trees that are gonna be spooked the next 2 turns, doesn't allow completes until day 11, starts end game logic on day 18 instead of 19 and spreads out late game actions even more, optimizes GROW actions for sun point differential with opponent rather than just our gain
+- (381 Gold -> 415 Gold) Revert tree limit back to (1, 2, 4). Add logic to COMPLETE trees early if they will stop some of our other trees from gaining sun points next day
+- (258 Gold -> 383 Gold) Update tree size limit to (2 small, 3 medium, 3 large). Add a fallback seeding algo that seeds distance 3 away (in a straight line) if the L strat has no viable seeding locations. In early game, don't allow GROW actions that have zero or negative sun point payoff
 - (230 Gold -> 259 Gold) Define a limit per size of tree (1 small, 2 medium, 4 large). Try to complete once we've reached all tree size limits, enforcing earlier completion.
 - (306 Gold -> 202 Gold) Update seeding algo to check for potential blockages since the "L" strategy doesn't fully stop us from blocking ourselves
 - (713 Gold -> 325 Gold) Max small trees === 1

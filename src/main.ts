@@ -1,7 +1,6 @@
 import { parseInitializationInput, parseTurnInput } from "./inputParser";
 import getActionForSunPointSaverStrategy from "./strategy/sunPointSaverStrategy";
 import { getActionForCompleteTreesStrategy } from "./strategy/completeTreesStrategy";
-import { NUM_DAYS } from "./miscConstants";
 import { getTrashTalk } from "./utils/trashTalker";
 import Action from "./model/Action";
 import Cell from "./model/Cell";
@@ -23,10 +22,11 @@ while (true) {
     lateGameActionCount = 0;
   }
   let action: Action;
-  if (game.day / NUM_DAYS < 0.75) {
+  if (game.day < 17) {
     action = getActionForSunPointSaverStrategy(game, staticCellData);
   } else {
-    if (lateGameActionCount > 1) {
+    const numLateGameActionsAllowedThisDay = game.day % 2 === 0 ? 2 : 1;
+    if (lateGameActionCount >= numLateGameActionsAllowedThisDay) {
       action = new Action("WAIT");
     } else {
       console.error(`taking late game action - ${lateGameActionCount}`);
