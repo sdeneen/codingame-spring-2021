@@ -8,7 +8,7 @@ const createInitialGame = () =>
   new Game(
     1,
     2,
-    [new Cell(0, 1, [1, 2, 3, 4, 5, 6])],
+    [new Cell(1, 1, [1, 2, 3, 4, 5, 6]), new Cell(6, 1, [1, 2, 3, 4, 5, 6])],
     new Player(8, 2, [new Tree(1, 2, true, false)], false),
     new Player(7, 2, [new Tree(6, 2, false, false)], false)
   );

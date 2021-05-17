@@ -10,14 +10,15 @@ import Tree, {
   MEDIUM_TREE_SIZE,
 } from "../model/Tree";
 import { getTreesThatCastSpookyShadowOnTree } from "../shadowObserver";
+import calculateScoreForCompleteAction from "../scoreCalculator";
 
 /**
  * Strategy that just tries to complete trees as soon as possible, good for late game.
  */
 const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
   const maxTreesToConsider = 3;
-  const { myPlayer, cells } = game;
-  const { sunPoints } = myPlayer;
+  const { myPlayer, cells, nutrients } = game;
+  const { sunPoints, score } = myPlayer;
   const allMyTrees = myPlayer.getTrees();
   const daysRemainingIncludingCurDay = NUM_DAYS - game.day;
   const treesToConsider = allMyTrees.filter(
@@ -25,6 +26,8 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
       !tree.isDormant &&
       daysRemainingIncludingCurDay >= tree.getMinDaysToComplete()
   );
+
+  const curFinalGameScore = score + Math.floor(sunPoints / 3);
 
   treesToConsider.sort((tree1, tree2) => {
     // Prioritize largest size first (closest to completion)
@@ -56,6 +59,7 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
   );
   for (let i = 0; i < numTreesToConsider; i++) {
     const curTree = treesToConsider[i];
+    const cellForTree = cells[curTree.cellIndex];
     const actionForTree = curTree.getNextAction();
     if (actionForTree !== null) {
       const cost = calculateTreeActionCost(
@@ -63,7 +67,16 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
         actionForTree.type,
         curTree
       );
-      if (sunPoints >= cost) {
+
+      const scoreForCompletingTree = calculateScoreForCompleteAction(
+        nutrients,
+        cellForTree.richness
+      );
+      const resultingSunPoints = sunPoints - cost;
+      const resultingFinalScore =
+        score + scoreForCompletingTree + Math.floor(resultingSunPoints / 3);
+
+      if (sunPoints >= cost && resultingFinalScore > curFinalGameScore) {
         return actionForTree;
       }
     }
@@ -214,9 +227,7 @@ const getCompleteActionForTreeThatBlocksOurOtherTrees = (
 
 const getTreesToConsider = (trees: Tree[]): Tree[] => {
   return trees.filter(
-    (tree) =>
-      (tree.size === LARGE_TREE_SIZE || tree.size === MEDIUM_TREE_SIZE) &&
-      !tree.isDormant
+    (tree) => tree.size === LARGE_TREE_SIZE && !tree.isDormant
   );
 };
 
