@@ -1,6 +1,10 @@
 # codingame-spring-2021
+Our beaut strategy for dominating [the Spring Challenge 2021](https://www.codingame.com/multiplayer/bot-programming/spring-challenge-2021). (May 6 – 17, 2021)
 
-https://www.codingame.com/ide/challenge/spring-challenge-2021
+![image](https://user-images.githubusercontent.com/5615725/120074067-19177980-c069-11eb-9c74-2db9548e8538.png)
+
+![image](https://user-images.githubusercontent.com/5615725/120074049-f5543380-c068-11eb-902e-b28fe913bc7b.png)
+
 
 ## Setting up dev environment
 Just install [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable).
