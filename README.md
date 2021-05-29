@@ -3,7 +3,8 @@ Our beaut strategy for dominating [the Spring Challenge 2021](https://www.coding
 
 ![image](https://user-images.githubusercontent.com/5615725/120074067-19177980-c069-11eb-9c74-2db9548e8538.png)
 
-![image](https://user-images.githubusercontent.com/5615725/120074049-f5543380-c068-11eb-902e-b28fe913bc7b.png)
+## Results
+![image](https://user-images.githubusercontent.com/5615725/120074223-d3a77c00-c069-11eb-9349-b5a4b664b5a3.png)
 
 
 ## Setting up dev environment
