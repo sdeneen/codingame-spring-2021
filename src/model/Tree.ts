@@ -5,6 +5,7 @@ export const SMALL_TREE_SIZE = 1;
 export const MEDIUM_TREE_SIZE = 2;
 export const LARGE_TREE_SIZE = 3;
 export const LARGEST_TREE_SIZE = 3;
+export const ACTIONS_IN_TREE_LIFECYCLE = 5;
 
 export default class Tree {
   cellIndex: number;

@@ -1,4 +1,6 @@
-import calculateTreeActionCost from "../cost/ActionCostCalculator";
+import calculateTreeActionCost, {
+  COST_TO_COMPLETE_TREE,
+} from "../cost/ActionCostCalculator";
 import Action from "../model/Action";
 import Game from "../model/Game";
 import { NUM_DAYS } from "../miscConstants";
@@ -8,19 +10,24 @@ import Tree, {
   MEDIUM_TREE_SIZE,
 } from "../model/Tree";
 import { getTreesThatCastSpookyShadowOnTree } from "../shadowObserver";
+import calculateScoreForCompleteAction from "../scoreCalculator";
 
 /**
  * Strategy that just tries to complete trees as soon as possible, good for late game.
  */
 const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
   const maxTreesToConsider = 3;
-  const { myPlayer, cells } = game;
-  const { sunPoints } = myPlayer;
+  const { myPlayer, cells, nutrients } = game;
+  const { sunPoints, score } = myPlayer;
   const allMyTrees = myPlayer.getTrees();
   const daysRemainingIncludingCurDay = NUM_DAYS - game.day;
   const treesToConsider = allMyTrees.filter(
-    (tree) => daysRemainingIncludingCurDay >= tree.getMinDaysToComplete()
+    (tree) =>
+      !tree.isDormant &&
+      daysRemainingIncludingCurDay >= tree.getMinDaysToComplete()
   );
+
+  const curFinalGameScore = score + Math.floor(sunPoints / 3);
 
   treesToConsider.sort((tree1, tree2) => {
     // Prioritize largest size first (closest to completion)
@@ -52,6 +59,7 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
   );
   for (let i = 0; i < numTreesToConsider; i++) {
     const curTree = treesToConsider[i];
+    const cellForTree = cells[curTree.cellIndex];
     const actionForTree = curTree.getNextAction();
     if (actionForTree !== null) {
       const cost = calculateTreeActionCost(
@@ -59,7 +67,16 @@ const getActionForCompleteTreesStrategy = (game: Game): Action | null => {
         actionForTree.type,
         curTree
       );
-      if (sunPoints >= cost) {
+
+      const scoreForCompletingTree = calculateScoreForCompleteAction(
+        nutrients,
+        cellForTree.richness
+      );
+      const resultingSunPoints = sunPoints - cost;
+      const resultingFinalScore =
+        score + scoreForCompletingTree + Math.floor(resultingSunPoints / 3);
+
+      if (sunPoints >= cost && resultingFinalScore > curFinalGameScore) {
         return actionForTree;
       }
     }
@@ -129,15 +146,93 @@ const getAllWastedTrees = (game: Game, wastedDays: number): Tree[] => {
   return wastedTrees;
 };
 
+const getSunPointsGainedForTrees = (trees: Tree[]): number => {
+  if (trees.length === 0) {
+    return 0;
+  }
+
+  return trees.reduce((sum, tree) => sum + tree.getSunPointGainPerDay(), 0);
+};
+
+/**
+ * Conceptually the reverse of {getGrowOrCompleteActionForSpookedTrees}. Finds our large trees that will stop
+ * our other trees from getting sun next turn. Picks one to complete so that our blocked tree gets sun!
+ */
+const getCompleteActionForTreeThatBlocksOurOtherTrees = (
+  game: Game
+): Action | null => {
+  const { myPlayer, cells, day } = game;
+  if (myPlayer.sunPoints < COST_TO_COMPLETE_TREE) {
+    return null;
+  }
+
+  const myTrees = myPlayer.getTrees();
+  const sourceTreeIndexToBlockedTrees = {};
+  // Look at blockages over the next two days
+  for (let curDay = day + 1; curDay <= day + 2; curDay++) {
+    myTrees.forEach((tree) => {
+      const treesCastingSpookyShadowOnTree = getTreesThatCastSpookyShadowOnTree(
+        cells,
+        curDay,
+        tree
+      );
+
+      if (treesCastingSpookyShadowOnTree.length === 1) {
+        const sourceTree = treesCastingSpookyShadowOnTree[0];
+        if (sourceTree.isMine && sourceTree.size === LARGEST_TREE_SIZE) {
+          const blockedTrees =
+            sourceTreeIndexToBlockedTrees[sourceTree.cellIndex] || [];
+          blockedTrees.push(tree);
+          sourceTreeIndexToBlockedTrees[sourceTree.cellIndex] = blockedTrees;
+        }
+      }
+    });
+  }
+
+  // Only look at non-dormant trees that will cause us to lose at least N sun points over the next two turns
+  const cellIndiciesToConsiderCompleting = Object.keys(
+    sourceTreeIndexToBlockedTrees
+  ).filter(
+    (cellIndex) =>
+      !cells[cellIndex].tree.isDormant &&
+      getSunPointsGainedForTrees(sourceTreeIndexToBlockedTrees[cellIndex]) > 3
+  );
+
+  if (cellIndiciesToConsiderCompleting.length === 0) {
+    return null;
+  }
+
+  const chosenCellIndexStr = cellIndiciesToConsiderCompleting.reduce(
+    (cellIndex1, cellIndex2) => {
+      const sunPointsBlocked1 = getSunPointsGainedForTrees(
+        sourceTreeIndexToBlockedTrees[cellIndex1]
+      );
+      const sunPointsBlocked2 = getSunPointsGainedForTrees(
+        sourceTreeIndexToBlockedTrees[cellIndex2]
+      );
+      if (sunPointsBlocked1 !== sunPointsBlocked2) {
+        return sunPointsBlocked1 > sunPointsBlocked2 ? cellIndex1 : cellIndex2;
+      }
+
+      const richness1 = cells[cellIndex1].richness;
+      const richness2 = cells[cellIndex2].richness;
+      if (richness1 >= richness2) {
+        return cellIndex1;
+      }
+    }
+  );
+
+  return new Action("COMPLETE", null, parseInt(chosenCellIndexStr, 10));
+};
+
 const getTreesToConsider = (trees: Tree[]): Tree[] => {
   return trees.filter(
-    (tree) =>
-      (tree.size === LARGE_TREE_SIZE || tree.size === MEDIUM_TREE_SIZE) &&
-      !tree.isDormant
+    (tree) => tree.size === LARGE_TREE_SIZE && !tree.isDormant
   );
 };
 
 export {
   getActionForCompleteTreesStrategy,
   getGrowOrCompleteActionForSpookedTrees,
+  getCompleteActionForTreeThatBlocksOurOtherTrees,
 };

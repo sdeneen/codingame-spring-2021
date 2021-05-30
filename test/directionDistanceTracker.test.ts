@@ -8,24 +8,35 @@ const assertDistanceTrackerWorksWithoutDirection = (
   maxDistance,
   directionToExpectedCellIndices
 ) => {
-  const allCellIndiciesWithinDistance =
+  const distanceToCellIndicies =
     tracker.getCellIndiciesWithinDistanceInAnyDirection(
       fromCellIndex,
       maxDistance
     );
-  const expectedAllCellIndiciesWithinDistance =
-    directionToExpectedCellIndices.reduce(
-      (set1, set2) => new Set([...Array.from(set1), ...Array.from(set2)])
-    );
+  const expectedAllCellIndiciesWithinDistance = [[], [], []];
+  directionToExpectedCellIndices.forEach((cellIndices) => {
+    cellIndices.forEach((cellIndex, distanceIndex) => {
+      expectedAllCellIndiciesWithinDistance[distanceIndex].push(cellIndex);
+    });
+  });
 
-  expect(allCellIndiciesWithinDistance).toHaveLength(
-    expectedAllCellIndiciesWithinDistance.size
+  expect(distanceToCellIndicies).toHaveLength(
+    expectedAllCellIndiciesWithinDistance.length
   );
-  expect(
-    allCellIndiciesWithinDistance.every((i) =>
-      expectedAllCellIndiciesWithinDistance.has(i)
-    )
-  );
+
+  for (let distanceIndex = 0; distanceIndex < 3; distanceIndex++) {
+    expect(distanceToCellIndicies[distanceIndex]).toHaveLength(
+      expectedAllCellIndiciesWithinDistance[distanceIndex].length
+    );
+    const setOfExpectedIndices = new Set(
+      expectedAllCellIndiciesWithinDistance[distanceIndex]
+    );
+    expect(
+      distanceToCellIndicies[distanceIndex].every((i) =>
+        setOfExpectedIndices.has(i)
+      )
+    ).toBeTruthy();
+  }
 };
 
 test("it calculates cells in directions for center cell up to distance 3", () => {
@@ -33,12 +44,12 @@ test("it calculates cells in directions for center cell up to distance 3", () =>
   const maxDistance = 3;
   const tracker = new DirectionDistanceTracker(cellsData);
   const directionToExpectedCellIndices = [
-    new Set([1, 7, 19]),
-    new Set([2, 9, 22]),
-    new Set([3, 11, 25]),
-    new Set([4, 13, 28]),
-    new Set([5, 15, 31]),
-    new Set([6, 17, 34]),
+    [1, 7, 19],
+    [2, 9, 22],
+    [3, 11, 25],
+    [4, 13, 28],
+    [5, 15, 31],
+    [6, 17, 34],
   ];
   for (let direction = 0; direction < NUM_DIRECTIONS; direction++) {
     const direction0CellsWithin3 =
@@ -48,11 +59,13 @@ test("it calculates cells in directions for center cell up to distance 3", () =>
         direction,
         maxDistance
       );
-    const expectedCellIndices = directionToExpectedCellIndices[direction];
+    const expectedCellIndices = new Set(
+      directionToExpectedCellIndices[direction]
+    );
     expect(direction0CellsWithin3.length).toEqual(expectedCellIndices.size);
     expect(
       direction0CellsWithin3.every((index) => expectedCellIndices.has(index))
-    );
+    ).toBeTruthy();
   }
 
   assertDistanceTrackerWorksWithoutDirection(
@@ -68,12 +81,12 @@ test("it calculates cells in directions for center cell up to distance 2", () =>
   const maxDistance = 2;
   const tracker = new DirectionDistanceTracker(cellsData);
   const directionToExpectedCellIndices = [
-    new Set([1, 7]),
-    new Set([2, 9]),
-    new Set([3, 11]),
-    new Set([4, 13]),
-    new Set([5, 15]),
-    new Set([6, 17]),
+    [1, 7],
+    [2, 9],
+    [3, 11],
+    [4, 13],
+    [5, 15],
+    [6, 17],
   ];
   for (let direction = 0; direction < NUM_DIRECTIONS; direction++) {
     const direction0CellsWithin2 =
@@ -83,11 +96,13 @@ test("it calculates cells in directions for center cell up to distance 2", () =>
         direction,
         maxDistance
       );
-    const expectedCellIndices = directionToExpectedCellIndices[direction];
+    const expectedCellIndices = new Set(
+      directionToExpectedCellIndices[direction]
+    );
     expect(direction0CellsWithin2.length).toEqual(expectedCellIndices.size);
     expect(
       direction0CellsWithin2.every((index) => expectedCellIndices.has(index))
-    );
+    ).toBeTruthy();
   }
 
   assertDistanceTrackerWorksWithoutDirection(
@@ -103,12 +118,12 @@ test("it calculates cells in directions for cell close to edge up to distance 3"
   const maxDistance = 3;
   const tracker = new DirectionDistanceTracker(cellsData);
   const directionToExpectedCellIndices = [
-    new Set([4, 0, 1]),
-    new Set([12, 11, 24]),
-    new Set([27]),
-    new Set([28]),
-    new Set([29]),
-    new Set([14, 15, 32]),
+    [4, 0, 1],
+    [12, 11, 24],
+    [27],
+    [28],
+    [29],
+    [14, 15, 32],
   ];
   for (let direction = 0; direction < NUM_DIRECTIONS; direction++) {
     const direction0CellsWithin3 =
@@ -118,11 +133,13 @@ test("it calculates cells in directions for cell close to edge up to distance 3"
         direction,
         maxDistance
       );
-    const expectedCellIndices = directionToExpectedCellIndices[direction];
+    const expectedCellIndices = new Set(
+      directionToExpectedCellIndices[direction]
+    );
     expect(direction0CellsWithin3.length).toEqual(expectedCellIndices.size);
     expect(
       direction0CellsWithin3.every((index) => expectedCellIndices.has(index))
-    );
+    ).toBeTruthy();
   }
 
   assertDistanceTrackerWorksWithoutDirection(

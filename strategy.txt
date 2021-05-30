@@ -9,8 +9,8 @@ data driven algorithm to complete in a good way
 
 
 Concrete ideas:
-1. During phase 1 or 2, if one of our large trees is gonna block another one of our trees, COMPLETE it (maybe limit to high richness)
-2. Update SEED algo to aim for "L" shapes to avoid blocking ourselves
+1. Complete Earlier: Max out each size tree at a different limit (i.e. 1 size 1, 2 size 2's, 3 size 3's). If we are at all our limits, COMPLETE (can write a state manager func to see which COMPLETE leaves us with the most sun points in the next N turns)
+2. Complete Earlier: During phase 1 and/or 2, if one of our large trees is gonna block another one of our trees, COMPLETE it (maybe limit to high richness)
 
 
 ==== Old =====
@@ -43,7 +43,14 @@ Tips:
 
 Changelog (most recent first):
 FORMAT: (rankBefore -> rankAfter) Description of the change
-- (713 Gold -> 325) Max small trees === 1
+- (see prev -> 92 Legend!!!!!!!!!!!) Fixes bugs in scoring conversion logic. Updates conversion function that converts from score to sun points to have different conversion rates. Uses new algo for whole game (stops using our previous late game strategy)
+- (21 Gold -> ~29ish Gold at 60% progress in arena but we're running out of time so I'm killing this to send in the latest update before time runs out) Removes logic to do spooky avoidance completion, actions that give a decent sun point gain take priority over seeding, takes into account score when determining the best action in phase 1
+- (78 Gold -> 19 Gold) Considers GROW and COMPLETE actions together in the sunPointSaver strategy, stops considering GROW actions on MEDIUM size trees for spooky avoidance, maxes out LARGE trees at 5
+- (195 Gold -> 102 Gold) Avoid completion actions that will spend sun points that are worth more final score than the actual points gained for the COMPLETE, Add a fallback seeding algo that seeds distance 3 away (in a straight line) if the L strat has no viable seeding locations
+- (235 Gold -> 195 Gold) Optimizes GROW actions for sun point differential with opponent rather than just our gain, Adds logic to COMPLETE trees early if we think they will stop some of our other trees from gaining sun points over the next two days
+- (235 Gold No change, just resetting control since it's been a decent amount of time since it last ran
+- (306 Gold -> 202 Gold) Update seeding algo to check for potential blockages since the "L" strategy doesn't fully stop us from blocking ourselves
+- (713 Gold -> 325 Gold) Max small trees === 1
 - (1135 Gold -> 713 Gold) "L" strategy for seeding to avoid blocking ourselves most of the time
 - (221 Silver - GOLD!!!!) 2 actions per day during end game. seed from size 2+ trees only.
 - (303 Silver -> 221 Silver) Spooked tree checker includes size 2 and size 3 trees. Seed logic is preferred over grow for same tree if seed is in high richness

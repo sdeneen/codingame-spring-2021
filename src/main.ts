@@ -23,7 +23,7 @@ while (true) {
     lateGameActionCount = 0;
   }
   let action: Action;
-  if (game.day / NUM_DAYS < 0.75) {
+  if (game.day < 24) {
     action = getActionForSunPointSaverStrategy(game, staticCellData);
   } else {
     if (lateGameActionCount > 1) {

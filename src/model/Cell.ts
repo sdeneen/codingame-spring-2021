@@ -1,9 +1,18 @@
 import Tree from "./Tree";
+import { coalesce } from "../utils/nullUtils";
+import deepCopy from "../utils/deepCopy";
 
 export const UNUSABLE_RICHNESS = 0;
 export const LOW_RICHNESS = 1;
 export const MEDIUM_RICHNESS = 2;
 export const HIGH_RICHNESS = 3;
+
+interface CellFields {
+  index: number;
+  richness: number;
+  neighbors: [number, number, number, number, number, number];
+  tree: Tree | null;
+}
 
 export default class Cell {
   index: number;
@@ -44,6 +53,21 @@ export default class Cell {
     this.neighbors.filter((neighborIndex) => neighborIndex >= 0);
 
   toString = () => JSON.stringify(this);
+
+  getModifiedDeepCopy = ({
+    index,
+    richness,
+    neighbors,
+    tree,
+  }: Partial<CellFields>): Cell => {
+    const newCell = new Cell(
+      coalesce(index, this.index),
+      coalesce(richness, this.richness),
+      coalesce(neighbors, [...this.neighbors])
+    );
+    newCell.setTree(coalesce(tree, deepCopy(this.tree)));
+    return newCell;
+  };
 
   equals = (other: Cell): boolean =>
     !!other &&
